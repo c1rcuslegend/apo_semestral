@@ -16,6 +16,8 @@
 #include "serialize_lock.h"
 #include "font_types.h"
 #include "graphics.h"
+#include "main_menu.h"
+#include "input.h"
 #include "gui.h"
 
 // GLOBAL FONT VALUE
@@ -75,12 +77,48 @@ int main(int argc, char *argv[])
     }
     printf("Framebuffer allocated\n");
 
-    // Display start menu and wait for user input
-    if (displayStartMenu(fb, parlcd_mem_base, mem_base)) {
-        // Start the game
-        printf("Game playing...\n");
+    // Create memory map structure for hardware access
+    MemoryMap memMap = {
+        .mem_base = mem_base,
+        .parlcd_base = parlcd_mem_base
+    };
 
-        // PLACEHOLDER
+    // Display start screen and wait for input
+    if (displayStartMenu(fb, parlcd_mem_base, mem_base, &memMap)) {
+        int menuSelection;
+
+        // Display main menu and get selection
+        menuSelection = showMainMenu(fb, parlcd_mem_base, &memMap);
+
+        // Handle menu selection
+        switch (menuSelection) {
+            case MENU_START_GAME:
+                printf("Starting single player game...\n");
+                // Placeholder for single player game
+                clearScreen(fb, 0x0000);
+                drawCenteredString(fb, 160, "SINGLE PLAYER GAME", &font_winFreeSystem14x16, 0xFFFF, 2);
+                updateDisplay(parlcd_mem_base, fb);
+                sleep(2);
+                break;
+
+            case MENU_MULTIPLAYER:
+                printf("Starting multiplayer game...\n");
+                // Placeholder for multiplayer game
+                clearScreen(fb, 0x0000);
+                drawCenteredString(fb, 160, "MULTIPLAYER GAME", &font_winFreeSystem14x16, 0xFFFF, 2);
+                updateDisplay(parlcd_mem_base, fb);
+                sleep(2);
+                break;
+
+            case MENU_SETTINGS:
+                printf("Opening settings...\n");
+                // Placeholder for settings
+                clearScreen(fb, 0x0000);
+                drawCenteredString(fb, 160, "SETTINGS", &font_winFreeSystem14x16, 0xFFFF, 2);
+                updateDisplay(parlcd_mem_base, fb);
+                sleep(2);
+                break;
+        }
     }
 
     printf("Game ended!\n");

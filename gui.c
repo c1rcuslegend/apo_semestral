@@ -8,6 +8,8 @@
 #include "gui.h"
 #include "graphics.h"
 #include "font_types.h"
+#include "main_menu.h"
+#include "input.h"
 
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;
@@ -19,7 +21,7 @@ static uint64_t get_time_ms() {
     return (tv.tv_sec * 1000LL) + (tv.tv_usec / 1000LL);
 }
 
-bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsigned char *mem_base) {
+bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsigned char *mem_base, MemoryMap *memMap) {
     // Clear screen with black background
     clearScreen(fb, 0x0000);
 
@@ -39,9 +41,9 @@ bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsign
     // Update display with initial content
     updateDisplay(parlcd_mem_base, fb);
 
-    // Wait for input (30 sec max)
+    // Wait for input (60 sec max)
     uint64_t start_time = get_time_ms();
-    while (get_time_ms() - start_time < 30000) {
+    while (get_time_ms() - start_time < 60000) {
         uint64_t current_time = get_time_ms();
 
         // visibility every interval
@@ -65,12 +67,16 @@ bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsign
             updateDisplay(parlcd_mem_base, fb);
         }
 
-        // Check for button press (PLACEHOLDER FOR input.c IMPLEMENTATION)
-        // TODO: Read buttons and return true when pressed
+        // Check for any button press
+        for (int i = 0; i < 3; i++) {
+            if (isButtonPressed(i)) {
+                return true;  // Button was pressed
+            }
+        }
 
         // Small delay to prevent CPU hogging
         usleep(10000); // 10ms
     }
 
-    return true;
+    return false;
 }
