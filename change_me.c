@@ -10,7 +10,7 @@
 #include "mzapo_phys.h"
 #include "mzapo_regs.h"
 #include "serialize_lock.h"
-#include "ppm_read_image.h"
+#include "ppm_image.h"
 
 #define LCD_WIDTH 480
 #define LCD_HEIGHT 320
@@ -48,33 +48,7 @@ int main(int argc, char *argv[])
   // Display the image with scaling
   parlcd_write_cmd(parlcd_mem_base, 0x2c);
 
-  // Calculate scaling factors
-  float scale_x = (float)LCD_WIDTH / image->width;
-  float scale_y = (float)LCD_HEIGHT / image->height;
-  float scale = (scale_x < scale_y) ? scale_x : scale_y;  // Use smaller scale to fit screen
-
-  // Calculate centered position
-  int offset_x = (LCD_WIDTH - (image->width * scale)) / 2;
-  int offset_y = (LCD_HEIGHT - (image->height * scale)) / 2;
-
-  // Display scaled image
-  for (int y = 0; y < LCD_HEIGHT; y++) {
-    for (int x = 0; x < LCD_WIDTH; x++) {
-      // Calculate if current pixel is within image bounds
-      int img_x = (x - offset_x) / scale;
-      int img_y = (y - offset_y) / scale;
-
-      if (img_x >= 0 && img_x < image->width &&
-          img_y >= 0 && img_y < image->height) {
-        // Display scaled image pixel
-        parlcd_write_data(parlcd_mem_base,
-            image->pixels[img_y * image->width + img_x]);
-          } else {
-            // Display black for areas outside image
-            parlcd_write_data(parlcd_mem_base, 0x0000);
-          }
-    }
-  }
+  show_image_scale(image, 10.0f);
 
   // Clean up
   free_ppm(image);

@@ -1,7 +1,10 @@
-#include "ppm_read_image.h"
+#include "ppm_image.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define LCD_WIDTH 480
+#define LCD_HEIGHT 320
 
 // Convert RGB888 to RGB565
 static uint16_t rgb888_to_rgb565(int r, int g, int b) {
@@ -82,5 +85,29 @@ void free_ppm(PPMImage* img) {
     if (img) {
         free(img->pixels);
         free(img);
+    }
+}
+
+void show_image_scale(PPMImage* image, float scale) {
+    int offset_x = (LCD_WIDTH - (image->width * scale)) / 2;
+    int offset_y = (LCD_HEIGHT - (image->height * scale)) / 2;
+
+    // Display scaled image
+    for (int y = 0; y < LCD_HEIGHT; y++) {
+        for (int x = 0; x < LCD_WIDTH; x++) {
+            // Calculate if current pixel is within image bounds
+            int img_x = (x - offset_x) / scale;
+            int img_y = (y - offset_y) / scale;
+
+            if (img_x >= 0 && img_x < image->width &&
+                img_y >= 0 && img_y < image->height) {
+                // Display scaled image pixel
+                parlcd_write_data(parlcd_mem_base,
+                    image->pixels[img_y * image->width + img_x]);
+                } else {
+                    // Display black for areas outside image
+                    parlcd_write_data(parlcd_mem_base, 0x0000);
+                }
+        }
     }
 }

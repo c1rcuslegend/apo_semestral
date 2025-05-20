@@ -1,5 +1,5 @@
-#ifndef PPM_READ_IMAGE_H
-#define PPM_READ_IMAGE_H
+#ifndef PPM_IMAGE_H
+#define PPM_IMAGE_H
 
 #include <stdint.h>
 
@@ -16,4 +16,7 @@ PPMImage* read_ppm(const char* filename);
 // Free the image structure
 void free_ppm(PPMImage* img);
 
-#endif //PPM_READ_IMAGE_H
+// Show the image on the LCD with scaling
+void show_image_scale(PPMImage* image, float scale);
+
+#endif //PPM_IMAGE_H
