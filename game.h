@@ -11,6 +11,19 @@
 #define LCD_WIDTH 480
 #define LCD_HEIGHT 320
 
+#define MAX_BULLETS 10      // Maximum number of bullets
+#define BULLET_SPEED 5      // Pixels per frame
+#define BULLET_WIDTH 2      // Width of bullet
+#define BULLET_HEIGHT 10    // Height of bullet
+#define BULLET_COLOR 0xFFE0 // Yellow
+
+// Bullet structure
+typedef struct {
+    int x;          // X position
+    int y;          // Y position
+    bool active;    // Whether bullet is active
+} Bullet;
+
 // Game state structure
 typedef struct {
     PPMImage* shipSprite;   // Ship sprite
@@ -20,6 +33,8 @@ typedef struct {
     int shipHeight;         // Height of ship sprite when rendered
     float shipScale;        // Scale factor for ship
     bool gameOver;          // Game over flag
+    Bullet bullets[MAX_BULLETS]; // Array of bullets
+    int lastShotTime;            // Time of last shot (to prevent spamming)
 } GameState;
 
 // Initialize the game

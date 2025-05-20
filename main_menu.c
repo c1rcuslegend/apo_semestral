@@ -22,7 +22,7 @@ static const char* menuItemLabels[MENU_OPTIONS_COUNT] = {
 };
 
 // Colors
-#define COLOR_BACKGROUND 0x0000    // Black
+#define COLOR_BACKGROUND 0x2A0134   // Dark Purple
 #define COLOR_TEXT       0xFFFF    // White
 #define COLOR_SELECTED   0x001F    // Blue background
 #define COLOR_HIGHLIGHT  0xF800    // Red

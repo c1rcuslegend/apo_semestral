@@ -125,7 +125,7 @@ int main(int argc, char *argv[])
             case MENU_MULTIPLAYER:
                 printf("Starting multiplayer game...\n");
                 // Placeholder for multiplayer game
-                clearScreen(fb, 0x0000);
+                clearScreen(fb, 0x2A0134);
                 drawCenteredString(fb, 160, "MULTIPLAYER GAME", &font_winFreeSystem14x16, 0xFFFF, 2);
                 updateDisplay(parlcd_mem_base, fb);
                 sleep(2);
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
             case MENU_SETTINGS:
                 printf("Opening settings...\n");
                 // Placeholder for settings
-                clearScreen(fb, 0x0000);
+                clearScreen(fb, 0x2A0134);
                 drawCenteredString(fb, 160, "SETTINGS", &font_winFreeSystem14x16, 0xFFFF, 2);
                 updateDisplay(parlcd_mem_base, fb);
                 sleep(2);
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
     printf("Game ended!\n");
 
     // Clear screen with black background
-    clearScreen(fb, 0x0000);
+    clearScreen(fb, 0x2A0134);
     /* Release the lock and clean up*/
     free(fb);
     serialize_unlock();

@@ -9,6 +9,13 @@
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;
 
+// Returns time in milliseconds
+uint64_t get_time_ms() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (tv.tv_sec * 1000LL) + (tv.tv_usec / 1000LL);
+}
+
 bool initGame(GameState* game, MemoryMap* memMap) {
     if (!game) return false;
     // Initialize input system
@@ -30,9 +37,37 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     game->shipX = (LCD_WIDTH - game->shipWidth) / 2;
     game->shipY = GAME_BOUNDARY_Y - game->shipHeight;
 
+    // Initialize bullets
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        game->bullets[i].active = false;
+    }
+    game->lastShotTime = 0;
+
     game->gameOver = false;
 
     return true;
+}
+
+// Create a new bullet at the ship's position
+void fireBullet(GameState* game) {
+    // Limit fire rate (250ms between shots, no spamming)
+    uint64_t currentTime = get_time_ms();
+    if (currentTime - game->lastShotTime < 250) {
+        return;
+    }
+
+    // Find an inactive bullet
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        if (!game->bullets[i].active) {
+            // Position bullet at top center of ship
+            game->bullets[i].x = game->shipX + (game->shipWidth / 2) - (BULLET_WIDTH / 2);
+            game->bullets[i].y = game->shipY - BULLET_HEIGHT;
+            game->bullets[i].active = true;
+
+            game->lastShotTime = currentTime;
+            return;
+        }
+    }
 }
 
 void updateGame(GameState* game, MemoryMap* memMap) {
@@ -54,7 +89,20 @@ void updateGame(GameState* game, MemoryMap* memMap) {
 
     // Process shooting (BLUE_KNOB button)
     if (isButtonPressed(BLUE_KNOB)) {
-        // TODO: Implement shooting
+        fireBullet(game);
+    }
+
+    // Update bullet positions
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        if (game->bullets[i].active) {
+            // Move bullet upward
+            game->bullets[i].y -= BULLET_SPEED;
+
+            // Deactivate bullet if it goes off screen
+            if (game->bullets[i].y + BULLET_HEIGHT < 0) {
+                game->bullets[i].active = false;
+            }
+        }
     }
 }
 
@@ -62,7 +110,7 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
     if (!game) return;
 
     // Clear the screen
-    clearScreen(fb, 0x0000); // Black background
+    clearScreen(fb, 0x2A0134); // Dark purple background
 
     // Draw boundary line
     for (int x = 0; x < LCD_WIDTH; x++) {
@@ -78,9 +126,20 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
             if (srcX < game->shipSprite->width && srcY < game->shipSprite->height) {
                 uint16_t color = game->shipSprite->pixels[srcY * game->shipSprite->width + srcX];
 
-                // Skip transparent pixels (assuming 0x0000 is transparent)
+                // Skip transparent pixels
                 if (color != 0x0000) {
                     drawPixel(fb, game->shipX + x, game->shipY + y, color);
+                }
+            }
+        }
+    }
+
+    // Draw bullets
+    for (int i = 0; i < MAX_BULLETS; i++) {
+        if (game->bullets[i].active) {
+            for (int y = 0; y < BULLET_HEIGHT; y++) {
+                for (int x = 0; x < BULLET_WIDTH; x++) {
+                    drawPixel(fb, game->bullets[i].x + x, game->bullets[i].y + y, BULLET_COLOR);
                 }
             }
         }

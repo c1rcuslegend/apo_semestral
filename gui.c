@@ -24,7 +24,7 @@ static uint64_t get_time_ms() {
 bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsigned char *mem_base, MemoryMap *memMap) {
     inputInit(memMap);
     // Clear screen with black background
-    clearScreen(fb, 0x0000);
+    clearScreen(fb, 0x2A0134);
 
     // Draw starting text
     drawCenteredString(fb, 120, "SPACE INVADERS", &font_winFreeSystem14x16, 0xFFFF, 3);
@@ -55,7 +55,7 @@ bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsign
             // clear text area
             for (int y = text_y; y < text_y + text_height; y++) {
                 for (int x = 0; x < LCD_WIDTH; x++) {
-                    drawPixel(fb, x, y, 0x0000);
+                    drawPixel(fb, x, y, 0x2A0134);
                 }
             }
 
