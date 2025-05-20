@@ -18,7 +18,7 @@ void drawChar(unsigned short *fb, int x, int y, char ch, font_descriptor_t *font
 // Draw a string of characters
 void drawString(unsigned short *fb, int x, int y, const char *text, font_descriptor_t *font, uint16_t color, int scale);
 // Calculate string width
-int stringWidth(const char *text, font_descriptor_t *font);
+int stringWidth(const char *text, font_descriptor_t *font, int scale);
 // Draw string centered horizontally on screen
 void drawCenteredString(unsigned short *fb, int y, const char *text, font_descriptor_t *font, uint16_t color, int scale);
 // Update the LCD display with the frame buffer

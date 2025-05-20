@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
+#include <sys/time.h>
 
 #include "mzapo_parlcd.h"
 #include "mzapo_phys.h"
@@ -14,12 +16,20 @@
 #include "serialize_lock.h"
 #include "font_types.h"
 #include "graphics.h"
+#include "gui.h"
 
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;
 
 #define LCD_WIDTH 480
 #define LCD_HEIGHT 320
+
+// Returns time in milliseconds
+uint64_t get_time_ms() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (tv.tv_sec * 1000LL) + (tv.tv_usec / 1000LL);
+}
 
 int main(int argc, char *argv[])
 {
@@ -65,19 +75,13 @@ int main(int argc, char *argv[])
     }
     printf("Framebuffer allocated\n");
 
-    // Clear screen with black background
-    clearScreen(fb, 0x0000);
+    // Display start menu and wait for user input
+    if (displayStartMenu(fb, parlcd_mem_base, mem_base)) {
+        // Start the game
+        printf("Game playing...\n");
 
-    // Draw some text
-    drawCenteredString(fb, 80, "SPACE INVADERS", &font_winFreeSystem14x16, 0xFFFF, 3);
-    drawCenteredString(fb, 120, "Micro Edition", &font_winFreeSystem14x16, 0x07E0, 2);
-    drawCenteredString(fb, 160, "Press any button to start", &font_winFreeSystem14x16, 0xF800, 1);
-
-    // Update LCD display
-    updateDisplay(parlcd_mem_base, fb);
-
-    // Wait for 5 seconds
-    sleep(5);
+        // PLACEHOLDER
+    }
 
     printf("Game ended!\n");
 
@@ -89,5 +93,3 @@ int main(int argc, char *argv[])
 
     return 0;
 }
-
-
