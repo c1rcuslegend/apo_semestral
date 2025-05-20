@@ -24,4 +24,7 @@ void free_ppm(PPMImage* img);
 // Show the image on the LCD with scaling
 void show_image_scale(unsigned char *parlcd_mem_base, PPMImage* image, float scale, int a, int b);
 
+// Clear the screen with a specific color
+void clear_screen(unsigned char *parlcd_mem_base, uint16_t color);
+
 #endif //PPM_IMAGE_H

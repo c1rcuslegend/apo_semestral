@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
   show_image_scale(parlcd_mem_base, images[0], 10.0f, 0, 0);
   show_image_scale(parlcd_mem_base, images[1], 10.0f, 170, 0);
-  show_image_scale(parlcd_mem_base, image[2], 10.0f, 340, 0);
+  show_image_scale(parlcd_mem_base, images[2], 10.0f, 340, 0);
 
   // Clean up all images
   for (int i = 0; i < NUM_CHARACTERS; i++) {

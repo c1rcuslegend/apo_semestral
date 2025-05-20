@@ -98,22 +98,28 @@ void show_image_scale(unsigned char *parlcd_mem_base, PPMImage* image, float sca
     int scaled_width = (int)(image->width * scale);
     int scaled_height = (int)(image->height * scale);
 
-    // Calculate the area to update (clamp to screen boundaries)
-    int start_x = (a < 0) ? 0 : a;
-    int start_y = (b < 0) ? 0 : b;
-    int end_x = (a + scaled_width > LCD_WIDTH) ? LCD_WIDTH : a + scaled_width;
-    int end_y = (b + scaled_height > LCD_HEIGHT) ? LCD_HEIGHT : b + scaled_height;
+    // Set cursor position to (a,b)
+    parlcd_write_cmd(parlcd_mem_base, 0x2a);  // Column address set
+    parlcd_write_data(parlcd_mem_base, a >> 8);
+    parlcd_write_data(parlcd_mem_base, a & 0xff);
+    parlcd_write_data(parlcd_mem_base, (a + scaled_width - 1) >> 8);
+    parlcd_write_data(parlcd_mem_base, (a + scaled_width - 1) & 0xff);
 
-    for (int y = start_y; y < end_y; y++) {
-        for (int x = start_x; x < end_x; x++) {
-            int img_x = (x - a) / scale;
-            int img_y = (y - b) / scale;
+    parlcd_write_cmd(parlcd_mem_base, 0x2b);  // Page address set
+    parlcd_write_data(parlcd_mem_base, b >> 8);
+    parlcd_write_data(parlcd_mem_base, b & 0xff);
+    parlcd_write_data(parlcd_mem_base, (b + scaled_height - 1) >> 8);
+    parlcd_write_data(parlcd_mem_base, (b + scaled_height - 1) & 0xff);
 
-            if (img_x >= 0 && img_x < image->width &&
-                img_y >= 0 && img_y < image->height) {
-                parlcd_write_data(parlcd_mem_base,
-                    image->pixels[img_y * image->width + img_x]);
-                }
+    parlcd_write_cmd(parlcd_mem_base, 0x2c);  // Memory write
+
+    // Draw only the scaled image pixels
+    for (int y = 0; y < scaled_height; y++) {
+        for (int x = 0; x < scaled_width; x++) {
+            int source_x = (int)(x / scale);
+            int source_y = (int)(y / scale);
+            parlcd_write_data(parlcd_mem_base,
+                image->pixels[source_y * image->width + source_x]);
         }
     }
 }
