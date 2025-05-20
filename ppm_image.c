@@ -123,10 +123,3 @@ void show_image_scale(unsigned char *parlcd_mem_base, PPMImage* image, float sca
         }
     }
 }
-
-void clear_screen(unsigned char *parlcd_mem_base, uint16_t color) {
-    parlcd_write_cmd(parlcd_mem_base, 0x2c);
-    for (int i = 0; i < LCD_WIDTH * LCD_HEIGHT; i++) {
-        parlcd_write_data(parlcd_mem_base, color);
-    }
-}

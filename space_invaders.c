@@ -19,6 +19,7 @@
 #include "main_menu.h"
 #include "input.h"
 #include "gui.h"
+#include "game.h"
 
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;
@@ -92,14 +93,34 @@ int main(int argc, char *argv[])
 
         // Handle menu selection
         switch (menuSelection) {
-            case MENU_START_GAME:
+            case MENU_START_GAME: {
                 printf("Starting single player game...\n");
-                // Placeholder for single player game
-                clearScreen(fb, 0x0000);
-                drawCenteredString(fb, 160, "SINGLE PLAYER GAME", &font_winFreeSystem14x16, 0xFFFF, 2);
-                updateDisplay(parlcd_mem_base, fb);
-                sleep(2);
+
+                // Initialize game state
+                GameState gameState;
+                if (initGame(&gameState, &memMap)) {
+                    // Game loop
+                    while (!gameState.gameOver) {
+                        // Update game state based on input
+                        updateGame(&gameState, &memMap);
+
+                        // Render game
+                        renderGame(&gameState, fb, parlcd_mem_base);
+
+                        // Check if RED knob is pressed to exit game (temporary)
+                        if (isButtonPressed(RED_KNOB)) {
+                            gameState.gameOver = true;
+                        }
+
+                        // Small delay to prevent CPU hogging
+                        usleep(16667); // ~60 FPS
+                    }
+
+                    // Clean up game resources
+                    cleanupGame(&gameState);
+                }
                 break;
+            }
 
             case MENU_MULTIPLAYER:
                 printf("Starting multiplayer game...\n");

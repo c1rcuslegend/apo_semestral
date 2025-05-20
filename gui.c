@@ -71,7 +71,7 @@ bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsign
         // Check for any button press
         for (int i = 0; i < 3; i++) {
             if (isButtonPressed(i)) {
-                usleep(100000); // Debounce delay
+                usleep(300000); // Debounce delay
                 return true;  // Button was pressed
             }
         }
