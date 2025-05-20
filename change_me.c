@@ -44,6 +44,9 @@ int main(int argc, char *argv[])
   // Initialize LCD
   parlcd_hx8357_init(parlcd_mem_base);
 
+  // Create array of PPMImage pointers
+  PPMImage* images[NUM_CHARACTERS];
+
   // Load all images
   for (int i = 0; i < NUM_CHARACTERS; i++) {
     images[i] = read_ppm(image_files[i]);
@@ -58,12 +61,11 @@ int main(int argc, char *argv[])
     }
   }
 
-  // Display the image with scaling
-  parlcd_write_cmd(parlcd_mem_base, 0x2c);
+  clear_screen(parlcd_mem_base, 0x0000);
 
-  show_image_scale(parlcd_mem_base, image, 10.0f, 0, 0);
-  show_image_scale(parlcd_mem_base, image, 10.0f, 170, 0);
-  show_image_scale(parlcd_mem_base, image, 10.0f, 340, 0);
+  show_image_scale(parlcd_mem_base, images[0], 10.0f, 0, 0);
+  show_image_scale(parlcd_mem_base, images[1], 10.0f, 170, 0);
+  show_image_scale(parlcd_mem_base, image[2], 10.0f, 340, 0);
 
   // Clean up all images
   for (int i = 0; i < NUM_CHARACTERS; i++) {

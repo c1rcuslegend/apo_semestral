@@ -94,22 +94,33 @@ void free_ppm(PPMImage* img) {
 void show_image_scale(unsigned char *parlcd_mem_base, PPMImage* image, float scale, int a, int b) {
     parlcd_write_cmd(parlcd_mem_base, 0x2c);
 
-    // Display scaled image starting from position (a,b)
-    for (int y = 0; y < LCD_HEIGHT; y++) {
-        for (int x = 0; x < LCD_WIDTH; x++) {
-            // Calculate if current pixel is within image bounds
+    // Calculate the boundaries of the scaled image
+    int scaled_width = (int)(image->width * scale);
+    int scaled_height = (int)(image->height * scale);
+
+    // Calculate the area to update (clamp to screen boundaries)
+    int start_x = (a < 0) ? 0 : a;
+    int start_y = (b < 0) ? 0 : b;
+    int end_x = (a + scaled_width > LCD_WIDTH) ? LCD_WIDTH : a + scaled_width;
+    int end_y = (b + scaled_height > LCD_HEIGHT) ? LCD_HEIGHT : b + scaled_height;
+
+    for (int y = start_y; y < end_y; y++) {
+        for (int x = start_x; x < end_x; x++) {
             int img_x = (x - a) / scale;
             int img_y = (y - b) / scale;
 
             if (img_x >= 0 && img_x < image->width &&
                 img_y >= 0 && img_y < image->height) {
-                // Display scaled image pixel
                 parlcd_write_data(parlcd_mem_base,
                     image->pixels[img_y * image->width + img_x]);
-                } else {
-                    // Display black for areas outside image
-                    parlcd_write_data(parlcd_mem_base, 0x0000);
                 }
         }
+    }
+}
+
+void clear_screen(unsigned char *parlcd_mem_base, uint16_t color) {
+    parlcd_write_cmd(parlcd_mem_base, 0x2c);
+    for (int i = 0; i < LCD_WIDTH * LCD_HEIGHT; i++) {
+        parlcd_write_data(parlcd_mem_base, color);
     }
 }
