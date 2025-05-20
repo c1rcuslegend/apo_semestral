@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
+#include <sys/time.h>
 #include "game.h"
 #include "graphics.h"
 #include "input.h"
@@ -110,7 +112,7 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
     if (!game) return;
 
     // Clear the screen
-    clearScreen(fb, 0x2A0134); // Dark purple background
+    clearScreen(fb, 0x7010); // Dark purple background
 
     // Draw boundary line
     for (int x = 0; x < LCD_WIDTH; x++) {
