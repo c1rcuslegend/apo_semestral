@@ -22,6 +22,6 @@ PPMImage* read_ppm(const char* filename);
 void free_ppm(PPMImage* img);
 
 // Show the image on the LCD with scaling
-void show_image_scale(unsigned char *parlcd_mem_base, PPMImage* image, float scale);
+void show_image_scale(unsigned char *parlcd_mem_base, PPMImage* image, float scale, int a, int b);
 
 #endif //PPM_IMAGE_H

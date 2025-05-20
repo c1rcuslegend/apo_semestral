@@ -91,18 +91,15 @@ void free_ppm(PPMImage* img) {
     }
 }
 
-void show_image_scale(unsigned char *parlcd_mem_base, PPMImage* image, float scale) {
-    parlcd_write_cmd(parlcd_mem_base, 0x2c);  // Move command here
+void show_image_scale(unsigned char *parlcd_mem_base, PPMImage* image, float scale, int a, int b) {
+    parlcd_write_cmd(parlcd_mem_base, 0x2c);
 
-    int offset_x = (LCD_WIDTH - (image->width * scale)) / 2;
-    int offset_y = (LCD_HEIGHT - (image->height * scale)) / 2;
-
-    // Display scaled image
+    // Display scaled image starting from position (a,b)
     for (int y = 0; y < LCD_HEIGHT; y++) {
         for (int x = 0; x < LCD_WIDTH; x++) {
             // Calculate if current pixel is within image bounds
-            int img_x = (x - offset_x) / scale;
-            int img_y = (y - offset_y) / scale;
+            int img_x = (x - a) / scale;
+            int img_y = (y - b) / scale;
 
             if (img_x >= 0 && img_x < image->width &&
                 img_y >= 0 && img_y < image->height) {

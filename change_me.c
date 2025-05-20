@@ -14,6 +14,13 @@
 
 #define LCD_WIDTH 480
 #define LCD_HEIGHT 320
+#define NUM_CHARACTERS 3
+
+const char* image_files[NUM_CHARACTERS] = {
+  "sprites/batman.ppm",
+  "sprites/harley_quinn.ppm",
+  "sprites/poison_ivy.ppm"
+};
 
 int main(int argc, char *argv[])
 {
@@ -37,21 +44,31 @@ int main(int argc, char *argv[])
   // Initialize LCD
   parlcd_hx8357_init(parlcd_mem_base);
 
-  // Read the PPM image
-  PPMImage* image = read_ppm("sprites/batman.ppm");
-  if (!image) {
-    printf("Failed to load image\n");
-    serialize_unlock();
-    return 1;
+  // Load all images
+  for (int i = 0; i < NUM_CHARACTERS; i++) {
+    images[i] = read_ppm(image_files[i]);
+    if (!images[i]) {
+      printf("Failed to load image: %s\n", image_files[i]);
+      // Clean up previously loaded images
+      for (int j = 0; j < i; j++) {
+        free_ppm(images[j]);
+      }
+      serialize_unlock();
+      return 1;
+    }
   }
 
   // Display the image with scaling
   parlcd_write_cmd(parlcd_mem_base, 0x2c);
 
-  show_image_scale(parlcd_mem_base, image, 10.0f);
+  show_image_scale(parlcd_mem_base, image, 10.0f, 0, 0);
+  show_image_scale(parlcd_mem_base, image, 10.0f, 170, 0);
+  show_image_scale(parlcd_mem_base, image, 10.0f, 340, 0);
 
-  // Clean up
-  free_ppm(image);
+  // Clean up all images
+  for (int i = 0; i < NUM_CHARACTERS; i++) {
+    free_ppm(images[i]);
+  }
   serialize_unlock();
 
   return 0;
