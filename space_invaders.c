@@ -69,9 +69,9 @@ int main(int argc, char *argv[])
     clearScreen(fb, 0x0000);
 
     // Draw some text
-    drawCenteredString(fb, 80, "SPACE INVADERS", &font_winFreeSystem14x16, 0xFFFF);
-    drawCenteredString(fb, 120, "Micro Edition", &font_winFreeSystem14x16, 0x07E0);
-    drawCenteredString(fb, 160, "Press any button to start", &font_winFreeSystem14x16, 0xF800);
+    drawCenteredString(fb, 80, "SPACE INVADERS", &font_winFreeSystem14x16, 0xFFFF, 3);
+    drawCenteredString(fb, 120, "Micro Edition", &font_winFreeSystem14x16, 0x07E0, 2);
+    drawCenteredString(fb, 160, "Press any button to start", &font_winFreeSystem14x16, 0xF800, 1);
 
     // Update LCD display
     updateDisplay(parlcd_mem_base, fb);

@@ -34,7 +34,7 @@ int charWidth(font_descriptor_t* fdes, char ch) {
 }
 
 // Draw a single character
-void drawChar(unsigned short *fb, int x, int y, char ch, font_descriptor_t *font, uint16_t color) {
+void drawChar(unsigned short *fb, int x, int y, char ch, font_descriptor_t *font, uint16_t color, int scale) {
     // check if the character is within the fonts range
     if (ch < font->firstchar || ch >= font->firstchar + font->size) {
         return;
@@ -62,7 +62,11 @@ void drawChar(unsigned short *fb, int x, int y, char ch, font_descriptor_t *font
         for (int i = 0; i < width; i++) { // for each column
             // If bit is set ( = 1), draw a pixel at that position
             if (bits[j] & mask) {
-                drawPixel(fb, x + i, y + j, color);
+                for (int sy = 0; sy < scale; sy++) {
+                    for (int sx = 0; sx < scale; sx++) {
+                        drawPixel(fb, x + i*scale + sx, y + j*scale + sy, color);
+                    }
+                }
             }
             // shift the mask right by 1 position
             // 1000 0000 0000 0000 --> 0100 0000 0000 0000 --> 0010 0000 0000 0000 --> ...
@@ -72,40 +76,40 @@ void drawChar(unsigned short *fb, int x, int y, char ch, font_descriptor_t *font
 }
 
 // Draw a string of text
-void drawString(unsigned short *fb, int x, int y, const char *text, font_descriptor_t *font, uint16_t color) {
+void drawString(unsigned short *fb, int x, int y, const char *text, font_descriptor_t *font, uint16_t color, int scale) {
     int orig_x = x;
 
     while (*text) {
         if (*text == '\n') {
             x = orig_x;
-            y += font->height;
+            y += font->height * scale;
         } else {
-            drawChar(fb, x, y, *text, font, color);
-            x += charWidth(font, *text) + 1; // a small gap between characters
+            drawChar(fb, x, y, *text, font, color, scale);
+            x += (charWidth(font, *text) + 1) * scale; // a small gap between characters
         }
         text++;
     }
 }
 
 // Calculate string width
-int stringWidth(const char *text, font_descriptor_t *font) {
+int stringWidth(const char *text, font_descriptor_t *font, int scale) {
     int width = 0;
     while (*text) {
         if (*text != '\n') {
-            width += charWidth(font, *text) + 1;
+            width += (charWidth(font, *text) + 1) * scale;
         } else {
             break; // Only calculate width of first line
         }
         text++;
     }
-    return width > 0 ? width - 1 : 0;
+    return width > 0 ? width - scale : 0;
 }
 
 // Draw string centered horizontally on screen
-void drawCenteredString(unsigned short *fb, int y, const char *text, font_descriptor_t *font, uint16_t color) {
-    int text_width = stringWidth(text, font);
+void drawCenteredString(unsigned short *fb, int y, const char *text, font_descriptor_t *font, uint16_t color, int scale) {
+    int text_width = stringWidth(text, font, scale);
     int x = (LCD_WIDTH - text_width) / 2;
-    drawString(fb, x, y, text, font, color);
+    drawString(fb, x, y, text, font, color, scale);
 }
 
 
