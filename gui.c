@@ -22,6 +22,7 @@ static uint64_t get_time_ms() {
 }
 
 bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsigned char *mem_base, MemoryMap *memMap) {
+    inputInit(memMap);
     // Clear screen with black background
     clearScreen(fb, 0x0000);
 
@@ -70,6 +71,7 @@ bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsign
         // Check for any button press
         for (int i = 0; i < 3; i++) {
             if (isButtonPressed(i)) {
+                usleep(100000); // Debounce delay
                 return true;  // Button was pressed
             }
         }
