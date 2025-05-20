@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
   parlcd_hx8357_init(parlcd_mem_base);
 
   // Read the PPM image
-  PPMImage* image = read_ppm("batman.ppm");
+  PPMImage* image = read_ppm("sprites/batman.ppm");
   if (!image) {
     printf("Failed to load image\n");
     serialize_unlock();

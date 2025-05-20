@@ -27,6 +27,8 @@ PPMImage* read_ppm(const char* filename) {
         return NULL;
     }
 
+    char line[128];
+
     // Read magic number
     if (!fgets(line, sizeof(line), file) || strncmp(line, "P6", 2) != 0) {
         free(img);
