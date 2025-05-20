@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
   // Display the image with scaling
   parlcd_write_cmd(parlcd_mem_base, 0x2c);
 
-  show_image_scale(image, 10.0f);
+  show_image_scale(parlcd_mem_base, image, 10.0f);
 
   // Clean up
   free_ppm(image);

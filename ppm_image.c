@@ -1,4 +1,8 @@
 #include "ppm_image.h"
+#include "mzapo_parlcd.h"
+#include "mzapo_phys.h"
+#include "mzapo_regs.h"
+#include "serialize_lock.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,9 +26,6 @@ PPMImage* read_ppm(const char* filename) {
         fclose(file);
         return NULL;
     }
-
-    char line[128];
-    char magic[3]; //P6 and P3 formats called magic numbers, P3 fo ASCII, P6 for binary
 
     // Read magic number
     if (!fgets(line, sizeof(line), file) || strncmp(line, "P6", 2) != 0) {
@@ -88,7 +89,9 @@ void free_ppm(PPMImage* img) {
     }
 }
 
-void show_image_scale(PPMImage* image, float scale) {
+void show_image_scale(unsigned char *parlcd_mem_base, PPMImage* image, float scale) {
+    parlcd_write_cmd(parlcd_mem_base, 0x2c);  // Move command here
+
     int offset_x = (LCD_WIDTH - (image->width * scale)) / 2;
     int offset_y = (LCD_HEIGHT - (image->height * scale)) / 2;
 
