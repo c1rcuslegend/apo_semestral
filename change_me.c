@@ -1,18 +1,3 @@
-/*******************************************************************
-  Project main function template for MicroZed based MZ_APO board
-  designed by Petr Porazil at PiKRON
-
-  change_me.c      - main file
-
-  include your name there and license for distribution.
-
-  Remove next text: This line should not appear in submitted
-  work and project name should be change to match real application.
-  If this text is there I want 10 points subtracted from final
-  evaluation.
-
- *******************************************************************/
-
 #define _POSIX_C_SOURCE 200112L
 
 #include <stdlib.h>
@@ -25,30 +10,56 @@
 #include "mzapo_phys.h"
 #include "mzapo_regs.h"
 #include "serialize_lock.h"
+#include "ppm_read_image.h"
+
+#define LCD_WIDTH 480
+#define LCD_HEIGHT 320
 
 int main(int argc, char *argv[])
 {
-
-  /* Serialize execution of applications */
-
-  /* Try to acquire lock the first */
+  // Serialize execution of applications
   if (serialize_lock(1) <= 0) {
     printf("System is occupied\n");
-
     if (1) {
-      printf("Waitting\n");
-      /* Wait till application holding lock releases it or exits */
+      printf("Waiting\n");
       serialize_lock(0);
     }
   }
 
-  printf("Hello world\n");
+  // Initialize hardware
+  unsigned char *parlcd_mem_base = map_phys_address(PARLCD_REG_BASE_PHYS, PARLCD_REG_SIZE, 0);
+  if (parlcd_mem_base == NULL) {
+    printf("LCD mapping failed\n");
+    serialize_unlock();
+    return 1;
+  }
 
-  sleep(4);
+  // Initialize LCD
+  parlcd_hx8357_init(parlcd_mem_base);
 
-  printf("Goodbye world\n");
+  // Read the PPM image
+  PPMImage* image = read_ppm("batman.ppm");
+  if (!image) {
+    printf("Failed to load image\n");
+    serialize_unlock();
+    return 1;
+  }
 
-  /* Release the lock */
+  // Display the image
+  parlcd_write_cmd(parlcd_mem_base, 0x2c);
+  for (int y = 0; y < LCD_HEIGHT; y++) {
+    for (int x = 0; x < LCD_WIDTH; x++) {
+      // If pixel is within image bounds, display it; otherwise display black
+      if (x < image->width && y < image->height) {
+        parlcd_write_data(parlcd_mem_base, image->pixels[y * image->width + x]);
+      } else {
+        parlcd_write_data(parlcd_mem_base, 0x0000);  // Black color
+      }
+    }
+  }
+
+  // Clean up
+  free_ppm(image);
   serialize_unlock();
 
   return 0;
