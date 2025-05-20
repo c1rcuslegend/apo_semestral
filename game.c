@@ -11,12 +11,7 @@
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;
 
-// Returns time in milliseconds
-uint64_t get_time_ms() {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return (tv.tv_sec * 1000LL) + (tv.tv_usec / 1000LL);
-}
+extern uint64_t get_time_ms();
 
 bool initGame(GameState* game, MemoryMap* memMap) {
     if (!game) return false;

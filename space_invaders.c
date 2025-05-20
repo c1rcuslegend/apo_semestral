@@ -9,6 +9,7 @@
 #include <string.h>
 #include <time.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include "mzapo_parlcd.h"
 #include "mzapo_phys.h"
