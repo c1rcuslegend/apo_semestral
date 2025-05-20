@@ -13,6 +13,7 @@
 #include "mzapo_regs.h"
 #include "serialize_lock.h"
 #include "font_types.h"
+#include "graphics.h"
 
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;

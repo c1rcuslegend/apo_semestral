@@ -1,3 +1,10 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include "graphics.h"
+#include "font_types.h"
+#include "mzapo_parlcd.h"
+
 // Draw a single pixel
 void drawPixel(unsigned short *fb, int x, int y, uint16_t color) {
     if (x >= 0 && x < LCD_WIDTH && y >= 0 && y < LCD_HEIGHT) {
