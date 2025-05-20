@@ -21,10 +21,10 @@ extern font_descriptor_t font_winFreeSystem14x16;
 #define LCD_HEIGHT 320
 
 // Function prototypes
-void drawPixel(unsigned char *fb, int x, int y, uint16_t color);
-void clearScreen(unsigned char *fb, uint16_t color);
-void drawChar(unsigned char *fb, int x, int y, char ch, font_descriptor_t *font, uint16_t color);
-void drawString(unsigned char *fb, int x, int y, const char *text, font_descriptor_t *font, uint16_t color);
+void drawPixel(unsigned short *fb, int x, int y, uint16_t color);
+void clearScreen(unsigned short *fb, uint16_t color);
+void drawChar(unsigned short *fb, int x, int y, char ch, font_descriptor_t *font, uint16_t color);
+void drawString(unsigned short *fb, int x, int y, const char *text, font_descriptor_t *font, uint16_t color);
 
 
 int main(int argc, char *argv[])
@@ -99,14 +99,14 @@ int main(int argc, char *argv[])
 }
 
 // Draw a single pixel
-void drawPixel(unsigned char *fb, int x, int y, uint16_t color) {
+void drawPixel(unsigned short *fb, int x, int y, uint16_t color) {
     if (x >= 0 && x < LCD_WIDTH && y >= 0 && y < LCD_HEIGHT) {
         *((uint16_t *)fb + y * LCD_WIDTH + x) = color;
     }
 }
 
 // Clear the screen with a single color
-void clearScreen(unsigned char *fb, uint16_t color) {
+void clearScreen(unsigned short *fb, uint16_t color) {
     for (int i = 0; i < LCD_WIDTH * LCD_HEIGHT; i++) {
         ((uint16_t *)fb)[i] = color;
     }
@@ -127,7 +127,7 @@ int charWidth(font_descriptor_t* fdes, char ch) {
 }
 
 // Draw a single character
-void drawChar(unsigned char *fb, int x, int y, char ch, font_descriptor_t *font, uint16_t color) {
+void drawChar(unsigned short *fb, int x, int y, char ch, font_descriptor_t *font, uint16_t color) {
     // check if the character is within the fonts range
     if (ch < font->firstchar || ch >= font->firstchar + font->size) {
         return;
@@ -140,7 +140,12 @@ void drawChar(unsigned char *fb, int x, int y, char ch, font_descriptor_t *font,
 
     // pointer to the start of the font bitmap data
     const uint16_t *bits = font->bits;
-    bits += font->offset[idx];
+    // Check if offset array exists before using it
+    if (font->offset) {
+        bits += font->offset[idx]; // offset table if available
+    } else {
+        bits += idx * height; // otherwise calculate position
+    }
 
 
     for (int j = 0; j < height; j++) { // for each row
@@ -160,7 +165,7 @@ void drawChar(unsigned char *fb, int x, int y, char ch, font_descriptor_t *font,
 }
 
 // Draw a string of text
-void drawString(unsigned char *fb, int x, int y, const char *text, font_descriptor_t *font, uint16_t color) {
+void drawString(unsigned short *fb, int x, int y, const char *text, font_descriptor_t *font, uint16_t color) {
     int orig_x = x;
 
     while (*text) {
