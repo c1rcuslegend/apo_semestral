@@ -12,6 +12,7 @@
 #include "mzapo_phys.h"
 #include "mzapo_regs.h"
 #include "serialize_lock.h"
+#include "font_types.h"
 
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;
@@ -53,18 +54,23 @@ int main(int argc, char *argv[])
     unsigned char *mem_base = map_phys_address(SPILED_REG_BASE_PHYS, SPILED_REG_SIZE, 0);
 
     /* If mapping fails exit with error code */
-    if ((mem_base == NULL) || (parlcd_mem_base == NULL))
+    if ((mem_base == NULL) || (parlcd_mem_base == NULL)) {
+        printf("LCD or LED memory mapping failed\n");
         exit(1);
+    }
+    printf("Memory mapped successfully\n");
 
     // Initialize LCD
     parlcd_hx8357_init(parlcd_mem_base);
+    printf("LCD initialized\n");
 
     // Frame buffer for LCD
-    unsigned char *fb = (unsigned char *)malloc(LCD_WIDTH * LCD_HEIGHT * 2);
+    unsigned short *fb = (unsigned short *)malloc(LCD_WIDTH * LCD_HEIGHT * 2);
     if (fb == NULL) {
-        printf("Memory allocation failed\n");
+        printf("Memory allocation for framebuffer failed\n");
         exit(1);
     }
+    printf("Framebuffer allocated\n");
 
     // Clear screen with black background
     clearScreen(fb, 0x0000);

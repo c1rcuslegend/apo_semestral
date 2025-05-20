@@ -10,7 +10,7 @@ LDLIBS += -lrt -lpthread
 #LDLIBS += -lm
 
 SOURCES = space_invaders.c mzapo_phys.c mzapo_parlcd.c serialize_lock.c
-#SOURCES += font_prop14x16.c font_rom8x16.c
+SOURCES += font_prop14x16.c font_rom8x16.c
 TARGET_EXE = space_invaders
 #TARGET_IP ?= 192.168.202.127
 ifeq ($(TARGET_IP),)
