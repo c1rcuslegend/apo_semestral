@@ -72,6 +72,7 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     game->gameOver = false;
     game->level = 1;
     game->score = 0;
+    game->lives = 3;
 
     return true;
 }
@@ -80,7 +81,7 @@ bool initGame(GameState* game, MemoryMap* memMap) {
 void initEnemies(GameState* game) {
     int startX = (LCD_WIDTH - ((MAX_ENEMY_COLS * ENEMY_WIDTH) +
                               ((MAX_ENEMY_COLS - 1) * ENEMY_SPACING_X))) / 2;
-    int startY = 30;
+    int startY = 40;
 
     game->enemyCount = 0;
     game->enemyDirection = 1;
@@ -129,6 +130,12 @@ void updateGame(GameState* game, MemoryMap* memMap) {
 
     // Update mystery ship
     updateMysteryShip(game);
+
+    // Check if all enemies are destroyed - level complete
+    if (game->enemyCount <= 0) {
+        game->level++;
+        initEnemies(game);
+    }
 }
 
 void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_base) {
@@ -189,8 +196,16 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
     }
 
     // Draw score/lives in bottom area
-    drawString(fb, 10, GAME_BOUNDARY_Y + 10, "SCORE: 0", &font_winFreeSystem14x16, 0xFFFF, 1);
-    drawString(fb, LCD_WIDTH - 100, GAME_BOUNDARY_Y + 10, "LIVES: 3", &font_winFreeSystem14x16, 0xFFFF, 1);
+    char scoreText[32];
+    char livesText[32];
+    char levelText[32];
+    sprintf(scoreText, "SCORE: %d", game->score);
+    sprintf(livesText, "LIVES: %d", game->lives);
+    sprintf(levelText, "LEVEL: %d", game->level);
+
+    drawString(fb, 10, GAME_BOUNDARY_Y + 10, scoreText, &font_winFreeSystem14x16, 0xFFFF, 1);
+    drawString(fb, 20 + stringWidth(scoreText, &font_winFreeSystem14x16, 1), GAME_BOUNDARY_Y + 10, livesText, &font_winFreeSystem14x16, 0xFFFF, 1);
+    drawString(fb, 30 + stringWidth(scoreText, &font_winFreeSystem14x16, 1) + stringWidth(livesText, &font_winFreeSystem14x16, 1), GAME_BOUNDARY_Y + 10, levelText, &font_winFreeSystem14x16, 0xFFFF, 1);
 
     // Update display
     updateDisplay(parlcd_mem_base, fb);

@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "game_utils.h"
 #include "graphics.h"
+#include "game.h"
 
 // External time function
 extern uint64_t get_time_ms();
@@ -238,4 +239,41 @@ void updateMysteryShip(GameState* game) {
 // Update player score
 void updateScore(GameState* game, int points) {
     game->score += points;
+}
+
+// Check if enemies need to change direction
+bool shouldChangeDirection(GameState* game) {
+    for (int row = 0; row < MAX_ENEMY_ROWS; row++) {
+        for (int col = 0; col < MAX_ENEMY_COLS; col++) {
+            if (game->enemies[row][col].alive) {
+                // Check right edge
+                if (game->enemyDirection > 0 &&
+                    game->enemies[row][col].x + ENEMY_WIDTH >= LCD_WIDTH) {
+                    return true;
+                }
+                // Check left edge
+                if (game->enemyDirection < 0 &&
+                    game->enemies[row][col].x <= 0) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+// Move all enemies down one row
+void moveEnemiesDown(GameState* game) {
+    for (int row = 0; row < MAX_ENEMY_ROWS; row++) {
+        for (int col = 0; col < MAX_ENEMY_COLS; col++) {
+            if (game->enemies[row][col].alive) {
+                game->enemies[row][col].y += ENEMY_HEIGHT / 2;
+
+                // Check if enemies reached the boundary
+                if (game->enemies[row][col].y + ENEMY_HEIGHT >= GAME_BOUNDARY_Y) {
+                    game->gameOver = true;
+                }
+            }
+        }
+    }
 }

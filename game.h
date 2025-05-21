@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include "ppm_image.h"
 #include "input.h"
-#include "game_utils.h"
 
 #define SHIP_SPEED 3        // Pixels per knob rotation unit
 #define BOTTOM_PADDING 30   // Padding at bottom of screen
@@ -13,16 +12,22 @@
 #define LCD_HEIGHT 320
 
 // Bullet
-#define MAX_BULLETS 10      // Maximum number of bullets
-#define MAX_ENEMY_BULLETS 2 // Maximum number of enemy bullets
+#define MAX_BULLETS 1      // Maximum number of bullets
 #define BULLET_SPEED 5      // Pixels per frame
 #define BULLET_WIDTH 2      // Width of bullet
 #define BULLET_HEIGHT 10    // Height of bullet
 #define BULLET_COLOR 0xFFE0 // Yellow
 
+// Enemy bullets
+#define MAX_ENEMY_BULLETS 5
+#define ENEMY_BULLET_SPEED 3
+#define ENEMY_BULLET_WIDTH 2
+#define ENEMY_BULLET_HEIGHT 10
+#define ENEMY_BULLET_COLOR 0xF800  // Red
+
 // Enemy
 #define MAX_ENEMY_ROWS 5
-#define MAX_ENEMY_COLS 9
+#define MAX_ENEMY_COLS 8
 #define ENEMY_WIDTH 50
 #define ENEMY_HEIGHT 30
 #define ENEMY_SPACING_X 4
@@ -31,7 +36,7 @@
 #define ENEMY_MOVE_INTERVAL 500 // ms between movements
 
 // Mystery ship
-#define MYSTERY_SHIP_WIDTH 40
+#define MYSTERY_SHIP_WIDTH 30
 #define MYSTERY_SHIP_HEIGHT 15
 #define MYSTERY_SHIP_SPEED 3
 
