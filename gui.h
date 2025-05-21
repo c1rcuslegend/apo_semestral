@@ -15,4 +15,15 @@
  */
 bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsigned char *mem_base,  MemoryMap *memMap);
 
+/**
+ * Displays the game over screen
+ *
+ * @param fb Pointer to the framebuffer
+ * @param parlcd_mem_base Pointer to the LCD memory base
+ * @param memMap Memory map for input
+ * @param score Final score of the player
+ * @return true when user presses a button to continue
+ */
+bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *memMap, int score);
+
 #endif /* GUI_H */

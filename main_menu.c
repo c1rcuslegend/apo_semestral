@@ -10,6 +10,7 @@
 #include "mzapo_parlcd.h"
 #include "mzapo_regs.h"
 #include "font_types.h"
+#include "texter.h"
 
 // External font reference
 extern font_descriptor_t font_winFreeSystem14x16;
@@ -18,7 +19,8 @@ extern font_descriptor_t font_winFreeSystem14x16;
 static const char* menuItemLabels[MENU_OPTIONS_COUNT] = {
     "Start Game",
     "Multiplayer",
-    "Settings"
+    "Settings",
+    "HIGH SCORE"
 };
 
 // Colors
@@ -161,8 +163,15 @@ int showMainMenu(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *
             for (int i = 0; i < MENU_OPTIONS_COUNT; i++) {
                 int itemWidth = stringWidth(menuItemLabels[i], &font_winFreeSystem14x16, 2);
                 int x = centerX - itemWidth/2;
-                drawMenuItem(fb, x, startY + i * spacing,
-                             menuItemLabels[i], (i == menu.selection));
+                if (i == MENU_OPTIONS_COUNT - 1) { // HIGH SCORE
+                    char highScoreLabel[64];
+                    snprintf(highScoreLabel, sizeof(highScoreLabel), "%s: %d", menuItemLabels[i], readHighScore());
+                    drawMenuItem(fb, x, startY + i * spacing,
+                                                     highScoreLabel, (i == menu.selection));
+                } else {
+                    drawMenuItem(fb, x, startY + i * spacing,
+                                 menuItemLabels[i], (i == menu.selection));
+                }
             }
 
             // Update display

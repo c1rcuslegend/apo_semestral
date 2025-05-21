@@ -82,3 +82,59 @@ bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsign
 
     return false;
 }
+
+bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base,
+                         MemoryMap *memMap, int score) {
+    // Clear screen with dark background
+    clearScreen(fb, 0x0000);
+
+    // Read high score
+    int highScore = readHighScore();
+    bool isNewHighScore = false;
+
+    // Check if new high score achieved
+    if (score > highScore) {
+        writeHighScore(score);
+        isNewHighScore = true;
+        highScore = score;
+    }
+
+    // Game Over text
+    char gameOver[] = "GAME OVER";
+    drawCenteredString(fb, 100, gameOver, &font_winFreeSystem14x16, 0xFF00, 2);
+
+    // Score display
+    char scoreText[32];
+    sprintf(scoreText, "Your Score: %d", score);
+    drawCenteredString(fb, 160, scoreText, &font_winFreeSystem14x16, 0xFFFF, 1);
+
+    // High score display
+    char highScoreText[32];
+    sprintf(highScoreText, "High Score: %d", highScore);
+    drawCenteredString(fb, 190, highScoreText, &font_winFreeSystem14x16, 0xFFFF, 1);
+
+    // New high score message if applicable
+    if (isNewHighScore) {
+        char newHighScoreText[] = "NEW HIGH SCORE!";
+        drawCenteredString(fb, 220, newHighScoreText, &font_winFreeSystem14x16, 0xFFE0, 1); // Yellow color
+    }
+
+    // Press any button to continue
+    char continueText[] = "Press any button to continue";
+    drawString(fb, (LCD_WIDTH - stringWidth(continueText, &font_winFreeSystem14x16, 1)) / 2,
+              270, continueText, &font_winFreeSystem14x16, 0xFFFF, 1);
+
+    // Update display
+    updateDisplay(parlcd_mem_base, fb);
+
+    // Check for any button press
+    while (1) {
+        for (int i = 0; i < 3; i++) {
+            if (isButtonPressed(i)) {
+                return true;  // Button was pressed
+            }
+        }
+    }
+
+    return false;
+}

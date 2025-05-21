@@ -132,6 +132,12 @@ void updateEnemyBullets(GameState* game) {
             // Move bullet downward
             game->enemyBullets[i].y += ENEMY_BULLET_SPEED;
 
+            // Check if bullet reached bottom boundary (not the screen bottom)
+            if (game->enemyBullets[i].y >= GAME_BOUNDARY_Y) {
+                game->enemyBullets[i].active = false;
+                continue;
+            }
+
             // Check collision with player
             if (checkCollision(
                     game->enemyBullets[i].x, game->enemyBullets[i].y,
@@ -206,6 +212,27 @@ void updateEnemyFormation(GameState* game) {
                 }
             }
         }
+
+        bool gameOverCondition = false;
+
+        // Check if any enemy has reached player level
+        for (int row = 0; row < MAX_ENEMY_ROWS; row++) {
+            for (int col = 0; col < MAX_ENEMY_COLS; col++) {
+                if (game->enemies[row][col].alive) {
+                    if (game->enemies[row][col].y + ENEMY_HEIGHT >= GAME_BOUNDARY_Y - game->shipHeight) {
+                        gameOverCondition = true;
+                        break;
+                    }
+                }
+            }
+            if (gameOverCondition) break;
+        }
+
+        if (gameOverCondition) {
+            game->lives = 0;  // Remove all lives
+            game->gameOver = true;
+        }
+
     }
 }
 
