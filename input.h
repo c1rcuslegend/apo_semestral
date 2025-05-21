@@ -5,9 +5,9 @@
 #include <stdbool.h>
 
 // Knob IDs
-#define RED_KNOB    2
+#define RED_KNOB    0
 #define GREEN_KNOB  1
-#define BLUE_KNOB   0
+#define BLUE_KNOB   2
 
 // Button states
 #define BUTTON_RELEASED 0

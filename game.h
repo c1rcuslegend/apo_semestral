@@ -21,8 +21,8 @@
 // Enemy
 #define MAX_ENEMY_ROWS 5
 #define MAX_ENEMY_COLS 11
-#define ENEMY_WIDTH 24
-#define ENEMY_HEIGHT 20
+#define ENEMY_WIDTH 40
+#define ENEMY_HEIGHT 15
 #define ENEMY_SPACING_X 16
 #define ENEMY_SPACING_Y 16
 #define ENEMY_MOVE_SPEED 2

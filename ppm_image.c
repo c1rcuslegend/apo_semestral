@@ -91,35 +91,30 @@ void free_ppm(PPMImage* img) {
     }
 }
 
-void show_image_scale(unsigned char *parlcd_mem_base, PPMImage* image, float scale, int a, int b) {
-    parlcd_write_cmd(parlcd_mem_base, 0x2c);
+void draw_sprite( unsigned short* fb, PPMImage* sprite, int x, int y, int width, int height, uint16_t transparentColor) {
+    if (!fb || !sprite) return;
 
-    // Calculate the boundaries of the scaled image
-    int scaled_width = (int)(image->width * scale);
-    int scaled_height = (int)(image->height * scale);
+    for (int dy = 0; dy < height; dy++) {
+        for (int dx = 0; dx < width; dx++) {
+            // Calculate source coordinates with scaling
+            int srcX = dx * sprite->width / width;
+            int srcY = dy * sprite->height / height;
 
-    // Set cursor position to (a,b)
-    parlcd_write_cmd(parlcd_mem_base, 0x2a);  // Column address set
-    parlcd_write_data(parlcd_mem_base, a >> 8);
-    parlcd_write_data(parlcd_mem_base, a & 0xff);
-    parlcd_write_data(parlcd_mem_base, (a + scaled_width - 1) >> 8);
-    parlcd_write_data(parlcd_mem_base, (a + scaled_width - 1) & 0xff);
+            if (srcX < sprite->width && srcY < sprite->height) {
+                uint16_t color = sprite->pixels[srcY * sprite->width + srcX];
 
-    parlcd_write_cmd(parlcd_mem_base, 0x2b);  // Page address set
-    parlcd_write_data(parlcd_mem_base, b >> 8);
-    parlcd_write_data(parlcd_mem_base, b & 0xff);
-    parlcd_write_data(parlcd_mem_base, (b + scaled_height - 1) >> 8);
-    parlcd_write_data(parlcd_mem_base, (b + scaled_height - 1) & 0xff);
+                // Skip transparent pixels
+                if (color != transparentColor) {
+                    // Calculate destination coordinates
+                    int destX = x + dx;
+                    int destY = y + dy;
 
-    parlcd_write_cmd(parlcd_mem_base, 0x2c);  // Memory write
-
-    // Draw only the scaled image pixels
-    for (int y = 0; y < scaled_height; y++) {
-        for (int x = 0; x < scaled_width; x++) {
-            int source_x = (int)(x / scale);
-            int source_y = (int)(y / scale);
-            parlcd_write_data(parlcd_mem_base,
-                image->pixels[source_y * image->width + source_x]);
+                    // Check if destination is within screen bounds
+                    if (destX >= 0 && destX < LCD_WIDTH && destY >= 0 && destY < LCD_HEIGHT) {
+                        fb[destY * LCD_WIDTH + destX] = color;
+                    }
+                }
+            }
         }
     }
 }

@@ -13,6 +13,8 @@ extern font_descriptor_t font_winFreeSystem14x16;
 
 extern uint64_t get_time_ms();
 
+void initEnemies(GameState* game);
+
 bool initGame(GameState* game, MemoryMap* memMap) {
     if (!game) return false;
     // Initialize input system
@@ -43,7 +45,7 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     // Load enemy sprites
     for (int i = 0; i < 3; i++) {
         char filename[32];
-        sprintf(filename, "sprites/batman.ppm", i);
+        sprintf(filename, "sprites/batman.ppm");
         game->enemySprites[i] = read_ppm(filename);
         if (!game->enemySprites[i]) {
             printf("Failed to load enemy sprite!\n");
@@ -251,22 +253,10 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
         drawPixel(fb, x, GAME_BOUNDARY_Y, 0xFFFF); // White line
     }
 
-    // Draw ship directly to framebuffer
-    for (int y = 0; y < game->shipHeight; y++) {
-        for (int x = 0; x < game->shipWidth; x++) {
-            int srcX = x / game->shipScale;
-            int srcY = y / game->shipScale;
+    // Draw ship
+    draw_sprite(fb, game->shipSprite, game->shipX, game->shipY,
+                game->shipWidth, game->shipHeight, 0x0000);
 
-            if (srcX < game->shipSprite->width && srcY < game->shipSprite->height) {
-                uint16_t color = game->shipSprite->pixels[srcY * game->shipSprite->width + srcX];
-
-                // Skip transparent pixels
-                if (color != 0x0000) {
-                    drawPixel(fb, game->shipX + x, game->shipY + y, color);
-                }
-            }
-        }
-    }
 
     // Draw bullets
     for (int i = 0; i < MAX_BULLETS; i++) {
@@ -283,49 +273,17 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
     for (int row = 0; row < MAX_ENEMY_ROWS; row++) {
         for (int col = 0; col < MAX_ENEMY_COLS; col++) {
             if (game->enemies[row][col].alive) {
-                // Get enemy sprite based on type
-                PPMImage* sprite = game->enemySprites[game->enemies[row][col].type];
-
-                // Draw enemy sprite
-                for (int y = 0; y < ENEMY_HEIGHT; y++) {
-                    for (int x = 0; x < ENEMY_WIDTH; x++) {
-                        int srcX = x * sprite->width / ENEMY_WIDTH;
-                        int srcY = y * sprite->height / ENEMY_HEIGHT;
-
-                        if (srcX < sprite->width && srcY < sprite->height) {
-                            uint16_t color = sprite->pixels[srcY * sprite->width + srcX];
-
-                            // Skip transparent pixels
-                            if (color != 0x0000) {
-                                drawPixel(fb,
-                                          game->enemies[row][col].x + x,
-                                          game->enemies[row][col].y + y,
-                                          color);
-                            }
-                        }
-                    }
-                }
+                draw_sprite(fb, game->enemySprites[game->enemies[row][col].type],
+                          game->enemies[row][col].x, game->enemies[row][col].y,
+                          ENEMY_WIDTH, ENEMY_HEIGHT, 0x0000);
             }
         }
     }
 
     // Draw mystery ship if active
     if (game->mysteryShip.active) {
-        for (int y = 0; y < ENEMY_HEIGHT; y++) {
-            for (int x = 0; x < ENEMY_WIDTH * 2; x++) {
-                int srcX = x * game->mysteryShipSprite->width / (ENEMY_WIDTH * 2);
-                int srcY = y * game->mysteryShipSprite->height / ENEMY_HEIGHT;
-
-                if (srcX < game->mysteryShipSprite->width && srcY < game->mysteryShipSprite->height) {
-                    uint16_t color = game->mysteryShipSprite->pixels[srcY * game->mysteryShipSprite->width + srcX];
-
-                    // Skip transparent pixels
-                    if (color != 0x0000) {
-                        drawPixel(fb, game->mysteryShip.x + x, 40 + y, color);
-                    }
-                }
-            }
-        }
+        draw_sprite(fb, game->mysteryShipSprite, game->mysteryShip.x, 40,
+                  ENEMY_WIDTH * 2, ENEMY_HEIGHT, 0x0000);
     }
 
     // Draw score/lives in bottom area

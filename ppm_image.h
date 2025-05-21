@@ -19,7 +19,13 @@ typedef struct {
 PPMImage* read_ppm(const char* filename);
 // Free the image structure
 void free_ppm(PPMImage* img);
-// Show the image on the LCD with scaling
-void show_image_scale(unsigned char *parlcd_mem_base, PPMImage* image, float scale, int a, int b);
+// Draw a sprite with scaling and transparency
+void draw_sprite(
+    unsigned short* fb,           // Framebuffer
+    PPMImage* sprite,             // Sprite image
+    int x, int y,                 // Position
+    int width, int height,        // Desired dimensions
+    uint16_t transparentColor     // Transparent color
+);
 
 #endif //PPM_IMAGE_H
