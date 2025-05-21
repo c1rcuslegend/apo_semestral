@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <time.h>
-#include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
 #include <time.h>
@@ -109,7 +108,7 @@ int main(int argc, char *argv[])
                         renderGame(&gameState, fb, parlcd_mem_base);
 
                         // Check if RED knob is pressed to exit game (temporary)
-                        if (isButtonPressed(RED_KNOB)) {
+                        if (isButtonPressed(BLUE_KNOB)) {
                             gameState.gameOver = true;
                         }
 
