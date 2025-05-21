@@ -83,13 +83,13 @@ bool isButtonPressed(int knobId) {
 
     switch (knobId) {
         case RED_KNOB:
-            buttonMask = 1 << 24;
+            buttonMask = 1 << 26;
             break;
         case GREEN_KNOB:
             buttonMask = 1 << 25;
             break;
         case BLUE_KNOB:
-            buttonMask = 1 << 26;
+            buttonMask = 1 << 24;
             break;
         default:
             return false;

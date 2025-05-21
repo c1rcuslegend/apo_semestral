@@ -7,6 +7,7 @@
 #include "graphics.h"
 #include "input.h"
 #include "font_types.h"
+#include "game_utils.h"
 
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;
@@ -45,7 +46,7 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     // Load enemy sprites
     for (int i = 0; i < 3; i++) {
         char filename[32];
-        sprintf(filename, "sprites/batman.ppm");
+        sprintf(filename, "sprites/spiderman.ppm");
         game->enemySprites[i] = read_ppm(filename);
         if (!game->enemySprites[i]) {
             printf("Failed to load enemy sprite!\n");
@@ -75,33 +76,11 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     return true;
 }
 
-// Create a new bullet at the ship's position
-void fireBullet(GameState* game) {
-    // Limit fire rate (250ms between shots, no spamming)
-    uint64_t currentTime = get_time_ms();
-    if (currentTime - game->lastShotTime < 250) {
-        return;
-    }
-
-    // Find an inactive bullet
-    for (int i = 0; i < MAX_BULLETS; i++) {
-        if (!game->bullets[i].active) {
-            // Position bullet at top center of ship
-            game->bullets[i].x = game->shipX + (game->shipWidth / 2) - (BULLET_WIDTH / 2);
-            game->bullets[i].y = game->shipY - BULLET_HEIGHT;
-            game->bullets[i].active = true;
-
-            game->lastShotTime = currentTime;
-            return;
-        }
-    }
-}
-
 // Initialize the enemy formation
 void initEnemies(GameState* game) {
     int startX = (LCD_WIDTH - ((MAX_ENEMY_COLS * ENEMY_WIDTH) +
                               ((MAX_ENEMY_COLS - 1) * ENEMY_SPACING_X))) / 2;
-    int startY = 60;
+    int startY = 30;
 
     game->enemyCount = 0;
     game->enemyDirection = 1;
@@ -113,43 +92,6 @@ void initEnemies(GameState* game) {
             game->enemies[row][col].alive = true;
             game->enemies[row][col].type = row / 2; // Enemy type based on row
             game->enemyCount++;
-        }
-    }
-}
-
-// Check if enemies need to change direction
-bool shouldChangeDirection(GameState* game) {
-    for (int row = 0; row < MAX_ENEMY_ROWS; row++) {
-        for (int col = 0; col < MAX_ENEMY_COLS; col++) {
-            if (game->enemies[row][col].alive) {
-                // Check right edge
-                if (game->enemyDirection > 0 &&
-                    game->enemies[row][col].x + ENEMY_WIDTH >= LCD_WIDTH) {
-                    return true;
-                }
-                // Check left edge
-                if (game->enemyDirection < 0 &&
-                    game->enemies[row][col].x <= 0) {
-                    return true;
-                }
-            }
-        }
-    }
-    return false;
-}
-
-// Move all enemies down one row
-void moveEnemiesDown(GameState* game) {
-    for (int row = 0; row < MAX_ENEMY_ROWS; row++) {
-        for (int col = 0; col < MAX_ENEMY_COLS; col++) {
-            if (game->enemies[row][col].alive) {
-                game->enemies[row][col].y += ENEMY_HEIGHT / 2;
-
-                // Check if enemies reached the boundary
-                if (game->enemies[row][col].y + ENEMY_HEIGHT >= GAME_BOUNDARY_Y) {
-                    game->gameOver = true;
-                }
-            }
         }
     }
 }
@@ -176,70 +118,17 @@ void updateGame(GameState* game, MemoryMap* memMap) {
         fireBullet(game);
     }
 
-    // Update bullet positions
-    for (int i = 0; i < MAX_BULLETS; i++) {
-        if (game->bullets[i].active) {
-            // Move bullet upward
-            game->bullets[i].y -= BULLET_SPEED;
+    // Update player bullets and bullet collisions
+    updatePlayerBullets(game);
 
-            // Deactivate bullet if it goes off screen
-            if (game->bullets[i].y + BULLET_HEIGHT < 0) {
-                game->bullets[i].active = false;
-            }
-        }
-    }
+    // Update enemy bullets
+    updateEnemyBullets(game);
 
-    // Update enemy movement
-    uint64_t currentTime = get_time_ms();
-    if (currentTime - game->lastEnemyMove > ENEMY_MOVE_INTERVAL) {
-        // Check if enemies need to change direction
-        if (shouldChangeDirection(game)) {
-            game->enemyDirection *= -1; // Reverse direction
-            moveEnemiesDown(game);      // Move down
-        } else {
-            // Move enemies horizontally
-            for (int row = 0; row < MAX_ENEMY_ROWS; row++) {
-                for (int col = 0; col < MAX_ENEMY_COLS; col++) {
-                    if (game->enemies[row][col].alive) {
-                        game->enemies[row][col].x += game->enemyDirection * ENEMY_MOVE_SPEED;
-                    }
-                }
-            }
-        }
-        game->lastEnemyMove = currentTime;
-    }
+    // Update enemy formation movement
+    updateEnemyFormation(game);
 
     // Update mystery ship
-    if (game->mysteryShip.active) {
-        game->mysteryShip.x += game->mysteryShip.direction * MYSTERY_SHIP_SPEED;
-
-        // If mystery ship goes off screen, reset to opposite side
-        if (game->mysteryShip.x > LCD_WIDTH) {
-            game->mysteryShip.x = -MYSTERY_SHIP_WIDTH;
-        } else if (game->mysteryShip.x + MYSTERY_SHIP_WIDTH < 0) {
-            game->mysteryShip.x = LCD_WIDTH;
-        }
-
-        // Randomly change direction or deactivate
-        if (rand() % 500 == 0) {
-            game->mysteryShip.direction *= -1;
-        }
-
-        // Randomly deactivate mystery ship
-        if (rand() % 1000 == 0) {
-            game->mysteryShip.active = false;
-        }
-    } else if (rand() % 500 == 0) { // Randomly activate inactive mystery ship
-        game->mysteryShip.active = true;
-        // Start from either left or right side
-        if (rand() % 2 == 0) {
-            game->mysteryShip.x = -MYSTERY_SHIP_WIDTH;
-            game->mysteryShip.direction = 1;
-        } else {
-            game->mysteryShip.x = LCD_WIDTH;
-            game->mysteryShip.direction = -1;
-        }
-    }
+    updateMysteryShip(game);
 }
 
 void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_base) {
@@ -269,6 +158,19 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
         }
     }
 
+    // Draw enemy bullets
+    for (int i = 0; i < MAX_ENEMY_BULLETS; i++) {
+        if (game->enemyBullets[i].active) {
+            for (int y = 0; y < BULLET_HEIGHT; y++) {
+                for (int x = 0; x < BULLET_WIDTH; x++) {
+                    drawPixel(fb, game->enemyBullets[i].x + x,
+                             game->enemyBullets[i].y + y,
+                             0xF800); // Red color for enemy bullets
+                }
+            }
+        }
+    }
+
     // Draw enemies
     for (int row = 0; row < MAX_ENEMY_ROWS; row++) {
         for (int col = 0; col < MAX_ENEMY_COLS; col++) {
@@ -282,7 +184,7 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
 
     // Draw mystery ship if active
     if (game->mysteryShip.active) {
-        draw_sprite(fb, game->mysteryShipSprite, game->mysteryShip.x, 40,
+        draw_sprite(fb, game->mysteryShipSprite, game->mysteryShip.x, 5,
                   ENEMY_WIDTH * 2, ENEMY_HEIGHT, 0x0000);
     }
 

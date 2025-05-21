@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "ppm_image.h"
 #include "input.h"
+#include "game_utils.h"
 
 #define SHIP_SPEED 3        // Pixels per knob rotation unit
 #define BOTTOM_PADDING 30   // Padding at bottom of screen
@@ -13,6 +14,7 @@
 
 // Bullet
 #define MAX_BULLETS 10      // Maximum number of bullets
+#define MAX_ENEMY_BULLETS 2 // Maximum number of enemy bullets
 #define BULLET_SPEED 5      // Pixels per frame
 #define BULLET_WIDTH 2      // Width of bullet
 #define BULLET_HEIGHT 10    // Height of bullet
@@ -20,19 +22,18 @@
 
 // Enemy
 #define MAX_ENEMY_ROWS 5
-#define MAX_ENEMY_COLS 11
-#define ENEMY_WIDTH 40
-#define ENEMY_HEIGHT 15
-#define ENEMY_SPACING_X 16
-#define ENEMY_SPACING_Y 16
-#define ENEMY_MOVE_SPEED 2
+#define MAX_ENEMY_COLS 9
+#define ENEMY_WIDTH 50
+#define ENEMY_HEIGHT 30
+#define ENEMY_SPACING_X 4
+#define ENEMY_SPACING_Y 0
+#define ENEMY_MOVE_SPEED 1
 #define ENEMY_MOVE_INTERVAL 500 // ms between movements
 
 // Mystery ship
 #define MYSTERY_SHIP_WIDTH 40
 #define MYSTERY_SHIP_HEIGHT 15
 #define MYSTERY_SHIP_SPEED 3
-#define MYSTERY_SHIP_Y 20
 
 // Bullet structure
 typedef struct {
@@ -52,6 +53,7 @@ typedef struct {
 // Mystery ship structure
 typedef struct {
     int x;
+    int y;
     bool active;
     int direction; // 1 = right, -1 = left
 } MysteryShip;
@@ -64,10 +66,13 @@ typedef struct {
     int shipWidth;          // Width of ship sprite when rendered
     int shipHeight;         // Height of ship sprite when rendered
     float shipScale;        // Scale factor for ship
-    bool gameOver;          // Game over flag
 
     Bullet bullets[MAX_BULLETS]; // Array of bullets
     int lastShotTime;            // Time of last shot (for rate limiting)
+
+    // Enemy bullets
+    Bullet enemyBullets[MAX_ENEMY_BULLETS];
+    int lastEnemyShot;           // Time of last enemy shot
 
     // Enemy data
     Enemy enemies[MAX_ENEMY_ROWS][MAX_ENEMY_COLS];
@@ -81,7 +86,9 @@ typedef struct {
     PPMImage* mysteryShipSprite;
 
     // Game progression
+    bool gameOver;          // Game over flag
     int level;
+    int lives;
     int score;
 } GameState;
 
@@ -93,5 +100,11 @@ void updateGame(GameState* game, MemoryMap* memMap);
 void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_base);
 // Free resources when game is done
 void cleanupGame(GameState* game);
+// Check if enemies should change direction
+bool shouldChangeDirection(GameState* game);
+// Move all enemies down one row
+void moveEnemiesDown(GameState* game);
+// Fire player bullet
+void fireBullet(GameState* game);
 
 #endif // GAME_H

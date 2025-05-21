@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
                         renderGame(&gameState, fb, parlcd_mem_base);
 
                         // Check if RED knob is pressed to exit game (temporary)
-                        if (isButtonPressed(BLUE_KNOB)) {
+                        if (isButtonPressed(GREEN_KNOB)) {
                             gameState.gameOver = true;
                         }
 
