@@ -160,7 +160,7 @@ int showMainMenu(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *
             int spacing = 40;  // Spacing between menu items
             int centerX = LCD_WIDTH / 2;
 
-            for (int i = 0; i < MENU_OPTIONS_COUNT; i++) {
+            for (int i = 0; i < MENU_OPTIONS_COUNT; i++) { // TODO: REMAKE THE HIGH SCORE TO NOT BE THE LAST ITEM AND MAKE THE KNOBS LESS SESNSITIVE
                 int itemWidth = stringWidth(menuItemLabels[i], &font_winFreeSystem14x16, 2);
                 int x = centerX - itemWidth/2;
                 if (i == MENU_OPTIONS_COUNT - 1) { // HIGH SCORE

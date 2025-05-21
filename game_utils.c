@@ -59,13 +59,13 @@ void updatePlayerBullets(GameState* game) {
                         game->bullets[i].x, game->bullets[i].y,
                         BULLET_WIDTH, BULLET_HEIGHT,
                         game->mysteryShip.x, game->mysteryShip.y,
-                        MYSTERY_SHIP_WIDTH, ENEMY_HEIGHT)) {
+                        MYSTERY_SHIP_WIDTH, MYSTERY_SHIP_HEIGHT)) {
 
                     // Kill mystery ship
                     game->mysteryShip.active = false;
 
                     // Award bonus points
-                    updateScore(game, 100);
+                    updateScore(game, MYSTERY_SHIP_POINTS);
 
                     // Deactivate bullet
                     game->bullets[i].active = false;

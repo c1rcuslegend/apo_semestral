@@ -192,7 +192,7 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
     // Draw mystery ship if active
     if (game->mysteryShip.active) {
         draw_sprite(fb, game->mysteryShipSprite, game->mysteryShip.x, 5,
-                  ENEMY_WIDTH * 2, ENEMY_HEIGHT, 0x0000);
+                  MYSTERY_SHIP_WIDTH, MYSTERY_SHIP_HEIGHT, 0x0000);
     }
 
     // Draw score/lives in bottom area

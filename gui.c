@@ -121,8 +121,7 @@ bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base,
 
     // Press any button to continue
     char continueText[] = "Press any button to continue";
-    drawString(fb, (LCD_WIDTH - stringWidth(continueText, &font_winFreeSystem14x16, 1)) / 2,
-              270, continueText, &font_winFreeSystem14x16, 0xFFFF, 1);
+    drawCenteredString(fb, 270, continueText, &font_winFreeSystem14x16, 0xFFFF, 1);
 
     // Update display
     updateDisplay(parlcd_mem_base, fb);

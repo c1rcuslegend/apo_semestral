@@ -36,9 +36,10 @@
 #define ENEMY_MOVE_INTERVAL 500 // ms between movements
 
 // Mystery ship
-#define MYSTERY_SHIP_WIDTH 30
-#define MYSTERY_SHIP_HEIGHT 15
+#define MYSTERY_SHIP_WIDTH 50
+#define MYSTERY_SHIP_HEIGHT 30
 #define MYSTERY_SHIP_SPEED 3
+#define MYSTERY_SHIP_POINTS 100
 
 // Bullet structure
 typedef struct {

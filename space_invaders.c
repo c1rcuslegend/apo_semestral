@@ -116,7 +116,14 @@ int main(int argc, char *argv[])
                         // usleep(16667); // ~60 FPS
                     }
 
+                    // Display game over screen
+                    while (!displayGameOverScreen(fb, parlcd_mem_base,
+                                             &memMap, gameState.score)) {
+                    // Wait for button press
+                    }
+
                     // Clean up game resources
+                    clearScreen(fb, 0x0000);
                     cleanupGame(&gameState);
                 }
                 break;
