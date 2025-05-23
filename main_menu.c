@@ -184,7 +184,7 @@ int showMainMenu(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *
             char highScoreLabel[64];
             snprintf(highScoreLabel, sizeof(highScoreLabel), "HIGH SCORE: %d", readHighScore());
             drawCenteredString(fb, startY + MENU_OPTIONS_COUNT * spacing + 20,
-                               highScoreLabel, &font_rom8x16, COLOR_TEXT, 1);
+                               highScoreLabel, &font_rom8x16, COLOR_HIGHLIGHT, 1);
 
             // Update display
             updateDisplay(parlcd_mem_base, fb);

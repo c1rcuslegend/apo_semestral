@@ -9,18 +9,19 @@
 #include "font_types.h"
 #include "game_utils.h"
 
-// Array of background colors - from light blue to dark blue (deeper space)
+// Array of background colors - from light blue to deep purple (deeper space)
 #define BACKGROUND_COLORS_COUNT 8
 static const uint16_t backgroundColors[BACKGROUND_COLORS_COUNT] = {
-    0x867F,  // Light blue
-    0x5EBF,  // Medium light blue
-    0x369F,  // Medium blue
-    0x1E5F,  // Medium dark blue
-    0x0E3F,  // Dark blue
-    0x061F,  // Darker blue
-    0x021F,  // Very dark blue
-    0x001F   // Darkest blue
+    0xAEDF,  // Light blue
+    0x5EDF,  // Sky blue
+    0x3C9F,  // Medium blue
+    0x1C5F,  // Deep blue
+    0x18BF,  // Indigo
+    0x88BF,  // Blue-purple
+    0xA09F,  // Purple
+    0x801F   // Dark purple
 };
+
 
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;

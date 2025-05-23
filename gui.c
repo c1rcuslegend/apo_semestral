@@ -28,7 +28,7 @@ bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsign
     clearScreen(fb, 0x7010);
 
     // Draw starting text
-    drawCenteredString(fb, 120, "SPACE INVADERS", &font_rom8x16, 0xFFFF, 3);
+    drawCenteredString(fb, 120, "SPACE INVADERS", &font_rom8x16, 0xFFE0, 3);
     drawCenteredString(fb, 180, "Micro Edition", &font_winFreeSystem14x16, 0x07E0, 2);
 
     // Blinking text implementation
@@ -132,6 +132,7 @@ bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base,
         for (int i = 0; i < 3; i++) {
             if (isButtonPressed(i)) {
                 clearScreen(fb, 0x0000);
+                updateDisplay(parlcd_mem_base, fb);
                 return true;  // Button was pressed
             }
         }
