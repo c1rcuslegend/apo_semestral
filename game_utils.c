@@ -14,78 +14,83 @@ bool checkCollision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int 
 
 // Update player bullets (movement and collision)
 void updatePlayerBullets(GameState* game, MemoryMap* memMap) {
-    for (int i = 0; i < MAX_BULLETS; i++) {
-        if (game->bullets[i].active) {
-            // Move bullet upward
-            game->bullets[i].y -= BULLET_SPEED;
+    if (!game) return;
 
-            // Check collisions with enemies
-            for (int row = 0; row < MAX_ENEMY_ROWS; row++) {
-                for (int col = 0; col < MAX_ENEMY_COLS; col++) {
-                    if (game->enemies[row][col].alive) {
-                        if (checkCollision(
-                                game->bullets[i].x, game->bullets[i].y,
-                                BULLET_WIDTH, BULLET_HEIGHT,
-                                game->enemies[row][col].x, game->enemies[row][col].y,
-                                ENEMY_WIDTH, ENEMY_HEIGHT)) {
+    // Update both player bullets
+    for (int player = 0; player < (game->isMultiplayer ? 2 : 1); player++) {
+        for (int i = 0; i < MAX_BULLETS; i++) {
+            if (game->bullets[player][i].active) {
+                // Move bullet upward
+                game->bullets[player][i].y -= BULLET_SPEED;
 
-                            // Kill enemy
-                            game->enemies[row][col].alive = false;
-                            game->enemyCount--;
+                // Check collisions with enemies
+                for (int row = 0; row < MAX_ENEMY_ROWS; row++) {
+                    for (int col = 0; col < MAX_ENEMY_COLS; col++) {
+                        if (game->enemies[row][col].alive) {
+                            if (checkCollision(
+                                    game->bullets[player][i].x, game->bullets[player][i].y,
+                                    BULLET_WIDTH, BULLET_HEIGHT,
+                                    game->enemies[row][col].x, game->enemies[row][col].y,
+                                    ENEMY_WIDTH, ENEMY_HEIGHT)) {
 
-                            // Award points based on row
-                            int points;
-                            if (row == 0) {
-                                points = 30;  // Top row
-                            } else if (row < 3) {
-                                points = 20;  // Middle rows
-                            } else {
-                                points = 10;  // Bottom rows
+                                // Kill enemy
+                                game->enemies[row][col].alive = false;
+                                game->enemyCount--;
+
+                                // Award points based on row
+                                int points;
+                                if (row == 0) {
+                                    points = 30;  // Top row
+                                } else if (row < 3) {
+                                    points = 20;  // Middle rows
+                                } else {
+                                    points = 10;  // Bottom rows
+                                }
+                                updateScore(game, points, player);
+
+                                flashEnemyKillLED(memMap, 0xFF00);
+
+                                // Deactivate bullet
+                                game->bullets[player][i].active = false;
+                                break;
                             }
-                            updateScore(game, points);
-
-                            flashEnemyKillLED(memMap, 0xFF00);
-
-                            // Deactivate bullet
-                            game->bullets[i].active = false;
-                            break;
                         }
                     }
+                    if (!game->bullets[player][i].active) break;
                 }
-                if (!game->bullets[i].active) break;
-            }
 
-            // Check collision with mystery ship
-            if (game->bullets[i].active && game->mysteryShip.active) {
-                if (checkCollision(
-                        game->bullets[i].x, game->bullets[i].y,
-                        BULLET_WIDTH, BULLET_HEIGHT,
-                        game->mysteryShip.x, game->mysteryShip.y,
-                        MYSTERY_SHIP_WIDTH, MYSTERY_SHIP_HEIGHT)) {
+                // Check collision with mystery ship
+                if (game->bullets[player][i].active && game->mysteryShip.active) {
+                    if (checkCollision(
+                            game->bullets[player][i].x, game->bullets[player][i].y,
+                            BULLET_WIDTH, BULLET_HEIGHT,
+                            game->mysteryShip.x, game->mysteryShip.y,
+                            MYSTERY_SHIP_WIDTH, MYSTERY_SHIP_HEIGHT)) {
 
-                    // Kill mystery ship
-                    game->mysteryShip.active = false;
+                        // Kill mystery ship
+                        game->mysteryShip.active = false;
 
-                    // Award bonus points
-                    updateScore(game, MYSTERY_SHIP_POINTS);
+                        // Award bonus points
+                        updateScore(game, MYSTERY_SHIP_POINTS, player);
 
-                    flashEnemyKillLED(memMap, 0xFFE0);
+                        flashEnemyKillLED(memMap, 0xFFE0);
 
-                    // Deactivate bullet
-                    game->bullets[i].active = false;
+                        // Deactivate bullet
+                        game->bullets[player][i].active = false;
+                    }
                 }
-            }
 
-            // Deactivate bullet if it goes off screen
-            if (game->bullets[i].active && game->bullets[i].y + BULLET_HEIGHT < 0) {
-                game->bullets[i].active = false;
+                // Deactivate bullet if it goes off screen
+                if (game->bullets[player][i].active && game->bullets[player][i].y + BULLET_HEIGHT < 0) {
+                    game->bullets[player][i].active = false;
+                }
             }
         }
     }
 }
 
 // Create a new bullet at the ship's position
-void fireBullet(GameState* game) {
+void fireBullet(GameState* game, int playerIndex) {
     // Limit fire rate (250ms between shots, no spamming)
     uint64_t currentTime = get_time_ms();
     if (currentTime - game->lastShotTime < 250) {
@@ -94,11 +99,11 @@ void fireBullet(GameState* game) {
 
     // Find an inactive bullet
     for (int i = 0; i < MAX_BULLETS; i++) {
-        if (!game->bullets[i].active) {
+        if (!game->bullets[playerIndex][i].active) {
             // Position bullet at top center of ship
-            game->bullets[i].x = game->shipX + (game->shipWidth / 2) - (BULLET_WIDTH / 2);
-            game->bullets[i].y = game->shipY - BULLET_HEIGHT;
-            game->bullets[i].active = true;
+            game->bullets[playerIndex][i].x = game->shipX[playerIndex] + (game->shipWidth / 2) - (BULLET_WIDTH / 2);
+            game->bullets[playerIndex][i].y = game->shipY[playerIndex] - BULLET_HEIGHT;
+            game->bullets[playerIndex][i].active = true;
 
             game->lastShotTime = currentTime;
             return;
@@ -142,28 +147,30 @@ void updateEnemyBullets(GameState* game) {
                 continue;
             }
 
-            // Check collision with player
-            if (checkCollision(
-                    game->enemyBullets[i].x, game->enemyBullets[i].y,
-                    ENEMY_BULLET_WIDTH, ENEMY_BULLET_HEIGHT,
-                    game->shipX, game->shipY,
-                    game->shipWidth, game->shipHeight)) {
+            // Check collision with players
+            for (int player = 0; player < (game->isMultiplayer ? 2 : 1); player++) {
+                if (game->lives[player] > 0 && checkCollision(
+                        game->enemyBullets[i].x, game->enemyBullets[i].y,
+                        ENEMY_BULLET_WIDTH, ENEMY_BULLET_HEIGHT,
+                        game->shipX[player], game->shipY[player],
+                        game->shipWidth, game->shipHeight)) {
 
-                // Reduce player lives
-                game->lives--;
+                    // Reduce player lives
+                    game->lives[player]--;
 
-                // Check game over
-                if (game->lives <= 0) {
-                    game->gameOver = true;
+                    // Check game over
+                    if (game->lives[player] <= 0 || (!game->isMultiplayer && ame->lives[player] <= 0 && ame->lives[ (player == 1) ? 0 : 1] <= 0)) {
+                        game->gameOver = true;
+                    }
+
+                    // Deactivate bullet
+                    game->enemyBullets[i].active = false;
                 }
 
-                // Deactivate bullet
-                game->enemyBullets[i].active = false;
-            }
-
-            // Deactivate bullet if it goes off screen
-            if (game->enemyBullets[i].y > GAME_BOUNDARY_Y) {
-                game->enemyBullets[i].active = false;
+                // Deactivate bullet if it goes off screen
+                if (game->enemyBullets[i].y > GAME_BOUNDARY_Y) {
+                    game->enemyBullets[i].active = false;
+                }
             }
         }
     }
@@ -233,7 +240,10 @@ void updateEnemyFormation(GameState* game) {
         }
 
         if (gameOverCondition) {
-            game->lives = 0;  // Remove all lives
+            game->lives[0] = 0;  // Remove all lives
+            if (game->isMultiplayer) {
+                game->lives[1] = 0;  // Remove all lives for player 2
+            }
             game->gameOver = true;
         }
 
@@ -268,8 +278,8 @@ void updateMysteryShip(GameState* game) {
 }
 
 // Update player score
-void updateScore(GameState* game, int points) {
-    game->score += points;
+void updateScore(GameState* game, int points, int player) {
+    game->score[player] += points;
 }
 
 // Check if enemies need to change direction

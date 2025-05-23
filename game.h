@@ -66,14 +66,14 @@ typedef struct {
 
 // Game state structure
 typedef struct {
-    PPMImage* shipSprite;   // Ship sprite
-    int shipX;              // Ship X position
-    int shipY;              // Ship Y position (fixed)
+    PPMImage* shipSprite[2];   // Ship sprite
+    int shipX[2];              // Ship X position
+    int shipY[2];              // Ship Y position (fixed)
     int shipWidth;          // Width of ship sprite when rendered
     int shipHeight;         // Height of ship sprite when rendered
     float shipScale;        // Scale factor for ship
 
-    Bullet bullets[MAX_BULLETS]; // Array of bullets
+    Bullet bullets[2][MAX_BULLETS]; // Array of bullets
     int lastShotTime;            // Time of last shot (for rate limiting)
 
     // Enemy bullets
@@ -94,12 +94,13 @@ typedef struct {
     // Game progression
     bool gameOver;          // Game over flag
     int level;
-    int lives;
-    int score;
+    int lives[2];
+    int score[2];
+    bool isMultiplayer; // Multiplayer mode
 } GameState;
 
 // Initialize the game
-bool initGame(GameState* game, MemoryMap* memMap);
+bool initGame(GameState* game, MemoryMap* memMap, bool multiplayer);
 // Update game state based on input
 void updateGame(GameState* game, MemoryMap* memMap);
 // Render the game to the framebuffer

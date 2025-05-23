@@ -43,7 +43,7 @@ extern uint64_t get_time_ms();
 
 void initEnemies(GameState* game);
 
-bool initGame(GameState* game, MemoryMap* memMap) {
+bool initGame(GameState* game, MemoryMap* memMap, bool multiplayer) {
     if (!game) return false;
     // Initialize input system
     inputInit(memMap);
@@ -53,9 +53,9 @@ bool initGame(GameState* game, MemoryMap* memMap) {
 
     // Load ship sprite
     if (mode == GAME_MODE_BIZARRE) {
-        game->shipSprite = read_ppm("sprites/harley_quinn.ppm");
+        game->shipSprite[0] = read_ppm("sprites/harley_quinn.ppm");
     } else {
-        game->shipSprite = read_ppm("sprites/player_01.ppm");
+        game->shipSprite[0] = read_ppm("sprites/player_01.ppm");
     }
     if (!game->shipSprite) {
         printf("Failed to load ship sprite\n");
@@ -63,19 +63,43 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     }
 
     // Set ship initial position and parameters
-    game->shipScale = (mode == GAME_MODE_BIZARRE) ? 3.0f : 1.5f ;
-    game->shipWidth = game->shipSprite->width * game->shipScale;
-    game->shipHeight = game->shipSprite->height * game->shipScale;
+    game->shipScale[0] = (mode == GAME_MODE_BIZARRE) ? 3.0f : 1.5f ;
+    game->shipWidth[0] = game->shipSprite->width * game->shipScale;
+    game->shipHeight[0] = game->shipSprite->height * game->shipScale;
 
     // Position ship at bottom center of screen
-    game->shipX = (LCD_WIDTH - game->shipWidth) / 2;
-    game->shipY = GAME_BOUNDARY_Y - game->shipHeight;
+    game->shipX[0] = (LCD_WIDTH - game->shipWidth) / 2;
+    game->shipY[0] = GAME_BOUNDARY_Y - game->shipHeight;
 
     // Initialize bullets
     for (int i = 0; i < MAX_BULLETS; i++) {
-        game->bullets[i].active = false;
+        game->bullets[0][i].active = false;
     }
     game->lastShotTime = 0;
+
+    // Player 2 initialization (if multiplayer)
+    game->isMultiplayer = multiplayer;
+    if (multiplayer) {
+        if (mode == GAME_MODE_BIZARRE) {
+            game->shipSprite[1] = read_ppm("sprites/poison_ivy.ppm");
+        } else {
+            game->shipSprite[1] = read_ppm("sprites/player_02.ppm");
+        }
+        if (!game->shipSprite[1]) {
+            // Fall back to player 1 sprite if player 2 sprite can't be loaded
+            game->shipSprite[1] = game->shipSprite[0];
+        }
+
+        game->shipX[1] = (LCD_WIDTH - game->shipWidth) / 2 + 50;  // Offset from player 1
+        game->shipY[1] = LCD_HEIGHT - game->shipHeight - 20;
+        game->score[1] = 0;
+        game->lives[1] = 3;
+
+        // Initialize player 2 bullets
+        for (int i = 0; i < MAX_BULLETS; i++) {
+            game->bullets[1][i].active = false;
+        }
+    }
 
     // Load enemy sprites
     int usedIndices[3] = {-1, -1, -1}; // Array to track which bizarre sprites are used
@@ -137,8 +161,8 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     // Game state
     game->gameOver = false;
     game->level = 1;
-    game->score = 0;
-    game->lives = 3;
+    game->score[0] = 0;
+    game->lives[0] = 3;
 
     return true;
 }
@@ -166,23 +190,43 @@ void initEnemies(GameState* game) {
 void updateGame(GameState* game, MemoryMap* memMap) {
     if (!game) return;
 
+    // Update player 1 (RED_KNOB)
     // Get knob rotation for horizontal movement
-    int moveX = getKnobRotation(RED_KNOB) * SHIP_SPEED;
-
+    int moveX1 = getKnobRotation(RED_KNOB) * SHIP_SPEED;
     // Update ship position
-    game->shipX += moveX;
+    game->shipX[0] += moveX1;
 
     // Keep ship within screen boundaries
-    if (game->shipX < 0) {
-        game->shipX = 0;
+    if (game->shipX[0] < 0) {
+        game->shipX[0] = 0;
     }
-    if (game->shipX > LCD_WIDTH - game->shipWidth) {
-        game->shipX = LCD_WIDTH - game->shipWidth;
+    if (game->shipX[0] > LCD_WIDTH - game->shipWidth) {
+        game->shipX[0] = LCD_WIDTH - game->shipWidth;
     }
 
     // Process shooting (RED_KNOB button)
     if (isButtonPressed(RED_KNOB)) {
-        fireBullet(game);
+        fireBullet(game, 0); // 0 = player 1
+    }
+
+    // Handle player 2 if in multiplayer mode
+    if (game->isMultiplayer) {
+        // Update player 2 (BLUE_KNOB)
+        int moveX2 = getKnobRotation(BLUE_KNOB) * SHIP_SPEED;
+        game->shipX[1] += moveX2;
+
+        // Keep player 2 within screen boundaries
+        if (game->shipX[1] < 0) {
+            game->shipX[1] = 0;
+        }
+        if (game->shipX[1] > LCD_WIDTH - game->shipWidth) {
+            game->shipX[1] = LCD_WIDTH - game->shipWidth;
+        }
+
+        // Process player 2 shooting
+        if (isButtonPressed(BLUE_KNOB)) {
+            fireBullet(game, 1);  // 1 = player 2
+        }
     }
 
     // Update player bullets and bullet collisions
@@ -202,6 +246,13 @@ void updateGame(GameState* game, MemoryMap* memMap) {
         game->level++;
         initEnemies(game);
     }
+
+    // Check game over condition
+    if (game->isMultiplayer) {
+        game->gameOver = (game->lives[0] <= 0 && game->lives[1] <= 0);
+    } else {
+        game->gameOver = (game->lives[0] <= 0);
+    }
 }
 
 void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_base) {
@@ -219,17 +270,28 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
         drawPixel(fb, x, GAME_BOUNDARY_Y, 0xFFFF); // White line
     }
 
-    // Draw ship
-    draw_sprite(fb, game->shipSprite, game->shipX, game->shipY,
-                game->shipWidth, game->shipHeight, 0x0000);
+    // Draw ships
+    if (game->lives[0] > 0) {
+        draw_sprite(fb, game->shipSprite[0], game->shipX[0], game->shipY[0],
+                    game->shipWidth, game->shipHeight, 0x0000);
+    }
 
+    // Draw player 2 ship if in multiplayer mode
+    if (game->isMultiplayer && game->lives[1] > 0) {
+        draw_sprite(fb, game->shipSprite[1], game->shipX[1], game->shipY[1],
+                   game->shipWidth, game->shipHeight, 0x0000);
+    }
 
     // Draw bullets
-    for (int i = 0; i < MAX_BULLETS; i++) {
-        if (game->bullets[i].active) {
-            for (int y = 0; y < BULLET_HEIGHT; y++) {
-                for (int x = 0; x < BULLET_WIDTH; x++) {
-                    drawPixel(fb, game->bullets[i].x + x, game->bullets[i].y + y, BULLET_COLOR);
+    for (int player = 0; player < (game->isMultiplayer ? 2 : 1); player++) {
+        for (int i = 0; i < MAX_BULLETS; i++) {
+            if (game->bullets[player][i].active) {
+                // Draw player's bullet (different colors for each player)
+                unsigned short bulletColor = (player == 0) ? BULLET_COLOR : 0x07FF; // Cyan for P2
+                for (int y = 0; y < BULLET_HEIGHT; y++) {
+                    for (int x = 0; x < BULLET_WIDTH; x++) {
+                        drawPixel(fb, game->bullets[player][i].x + x, game->bullets[player][i].y + y, BULLET_COLOR);
+                    }
                 }
             }
         }
@@ -265,18 +327,50 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
                   MYSTERY_SHIP_WIDTH, MYSTERY_SHIP_HEIGHT, 0x0000);
     }
 
-    // Draw score/lives in bottom area
-    char scoreText[32];
-    char livesText[32];
+    // Draw score/lives/level in bottom area
+    char scoreText1[32], livesText1[32];
+    sprintf(scoreText1, "SCORE1: %d", game->score[0]);
+    sprintf(livesText1, "LIVES1: %d", game->lives[0]);
+
+    // Calculate positions to display text
+    int xPos = 10;
+
+    // Draw player 1 info
+    drawString(fb, xPos, GAME_BOUNDARY_Y + 10, scoreText1, &font_winFreeSystem14x16, 0xFFFF, 1);
+    xPos += stringWidth(scoreText1, &font_winFreeSystem14x16, 1) + 10;
+
+    drawString(fb, xPos, GAME_BOUNDARY_Y + 10, livesText1, &font_winFreeSystem14x16, 0xFFFF, 1);
+    xPos += stringWidth(livesText1, &font_winFreeSystem14x16, 1) + 10;
+
+    // Draw level info in the middle
     char levelText[32];
-    sprintf(scoreText, "SCORE: %d", game->score);
-    sprintf(livesText, "LIVES: %d", game->lives);
     sprintf(levelText, "LEVEL: %d", game->level);
 
-    drawString(fb, 10, GAME_BOUNDARY_Y + 10, scoreText, &font_winFreeSystem14x16, 0xFFFF, 1);
-    drawString(fb, 20 + stringWidth(scoreText, &font_winFreeSystem14x16, 1), GAME_BOUNDARY_Y + 10, livesText, &font_winFreeSystem14x16, 0xFFFF, 1);
-    drawString(fb, 30 + stringWidth(scoreText, &font_winFreeSystem14x16, 1) + stringWidth(livesText, &font_winFreeSystem14x16, 1), GAME_BOUNDARY_Y + 10, levelText, &font_winFreeSystem14x16, 0xFFFF, 1);
+    // Center the level text
+    int levelX;
+    if (game->isMultiplayer) {
+        levelX = (LCD_WIDTH - stringWidth(levelText, &font_winFreeSystem14x16, 1)) / 2;
+    } else {
+        levelX = xPos;
+    }
 
+    drawString(fb, levelX, GAME_BOUNDARY_Y + 10, levelText, &font_winFreeSystem14x16, 0xFFFF, 1);
+
+    // Draw player 2 info if in multiplayer mode
+    if (game->isMultiplayer) {
+        char scoreText2[32], livesText2[32];
+        sprintf(scoreText2, "SCORE: %d", game->score[1]);
+        sprintf(livesText2, "LIVES: %d", game->lives[1]);
+
+        // Place player 2 info on the right side
+        int p2X = LCD_WIDTH - stringWidth(scoreText2, &font_winFreeSystem14x16, 1) -
+                  stringWidth(livesText2, &font_winFreeSystem14x16, 1) - 20;
+
+        drawString(fb, p2X, GAME_BOUNDARY_Y + 10, scoreText2, &font_winFreeSystem14x16, 0xFFFF, 1);
+        p2X += stringWidth(scoreText2, &font_winFreeSystem14x16, 1) + 10;
+
+        drawString(fb, p2X, GAME_BOUNDARY_Y + 10, livesText2, &font_winFreeSystem14x16, 0xFFFF, 1);
+    }
     // Update display
     updateDisplay(parlcd_mem_base, fb);
 }
@@ -284,10 +378,16 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
 void cleanupGame(GameState* game) {
     if (!game) return;
 
-    // Free ship sprite
-    if (game->shipSprite) {
-        free_ppm(game->shipSprite);
-        game->shipSprite = NULL;
+    // Free player 1 sprite
+    if (game->shipSprite[0]) {
+        free_ppm(game->shipSprite[0]);
+        game->shipSprite[0] = NULL;
+    }
+
+    // Free player 2 sprite if different from player 1
+    if (game->isMultiplayer && game->shipSprite[1] && game->shipSprite[1] != game->shipSprite[0]) {
+        free_ppm(game->shipSprite[1]);
+        game->shipSprite[1] = NULL;
     }
 
     // Free enemy sprites
