@@ -93,7 +93,7 @@ void updatePlayerBullets(GameState* game, MemoryMap* memMap) {
 void fireBullet(GameState* game, int playerIndex) {
     // Limit fire rate (250ms between shots, no spamming)
     uint64_t currentTime = get_time_ms();
-    if (currentTime - game->lastShotTime < 250) {
+    if (currentTime - game->lastShotTime[playerIndex] < 250) {
         return;
     }
 
@@ -105,7 +105,7 @@ void fireBullet(GameState* game, int playerIndex) {
             game->bullets[playerIndex][i].y = game->shipY[playerIndex] - BULLET_HEIGHT;
             game->bullets[playerIndex][i].active = true;
 
-            game->lastShotTime = currentTime;
+            game->lastShotTime[playerIndex] = currentTime;
             return;
         }
     }

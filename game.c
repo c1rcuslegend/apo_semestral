@@ -75,7 +75,7 @@ bool initGame(GameState* game, MemoryMap* memMap, bool multiplayer) {
     for (int i = 0; i < MAX_BULLETS; i++) {
         game->bullets[0][i].active = false;
     }
-    game->lastShotTime = 0;
+    game->lastShotTime[0] = 0;
 
     // Player 2 initialization (if multiplayer)
     game->isMultiplayer = multiplayer;
@@ -91,7 +91,7 @@ bool initGame(GameState* game, MemoryMap* memMap, bool multiplayer) {
         }
 
         game->shipX[1] = (LCD_WIDTH - game->shipWidth) / 2 + 50;  // Offset from player 1
-        game->shipY[1] = LCD_HEIGHT - game->shipHeight - 20;
+        game->shipY[1] = GAME_BOUNDARY_Y - game->shipHeight;
         game->score[1] = 0;
         game->lives[1] = 3;
 
@@ -99,6 +99,7 @@ bool initGame(GameState* game, MemoryMap* memMap, bool multiplayer) {
         for (int i = 0; i < MAX_BULLETS; i++) {
             game->bullets[1][i].active = false;
         }
+        game->lastShotTime[1] = 0;
     }
 
     // Load enemy sprites
@@ -329,8 +330,8 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
 
     // Draw score/lives/level in bottom area
     char scoreText1[32], livesText1[32];
-    sprintf(scoreText1, "SCORE1: %d", game->score[0]);
-    sprintf(livesText1, "LIVES1: %d", game->lives[0]);
+    sprintf(scoreText1, "SCORE: %d", game->score[0]);
+    sprintf(livesText1, "LIVES: %d", game->lives[0]);
 
     // Calculate positions to display text
     int xPos = 10;
@@ -344,7 +345,7 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
 
     // Draw level info in the middle
     char levelText[32];
-    sprintf(levelText, "LEVEL: %d", game->level);
+    sprintf(levelText, "LVL: %d", game->level);
 
     // Center the level text
     int levelX;

@@ -74,7 +74,7 @@ typedef struct {
     float shipScale;        // Scale factor for ship
 
     Bullet bullets[2][MAX_BULLETS]; // Array of bullets
-    int lastShotTime;            // Time of last shot (for rate limiting)
+    int lastShotTime[2];            // Time of last shot (for rate limiting)
 
     // Enemy bullets
     Bullet enemyBullets[MAX_ENEMY_BULLETS];

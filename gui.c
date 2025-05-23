@@ -125,7 +125,7 @@ bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base,
     }
     // Score display
     char scoreText[32];
-    sprintf(scoreText, "Score: %d", playerScore;
+    sprintf(scoreText, "Score: %d", playerScore);
     drawCenteredString(fb, 160, scoreText, &font_winFreeSystem14x16, 0xFFFF, 1);
 
     // High score display
