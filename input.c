@@ -152,8 +152,6 @@ void setRGBLed(int ledIndex, uint32_t color) {
 void flashEnemyKillLED(MemoryMap *memMap, uint32_t color) {
     static uint64_t flashStartTime = 0;
     static bool flashing = false;
-    static uint32_t led1Original = 0;
-    static uint32_t led2Original = 0;
 
     uint64_t currentTime = getTimeMs();
 
@@ -176,7 +174,7 @@ void flashEnemyKillLED(MemoryMap *memMap, uint32_t color) {
     // Check if flash duration has passed
     if (flashing && (currentTime - flashStartTime >= 1000)) {
         // Restore original LED colors
-        turnOffAllLEDs(&memMap);
+        turnOffAllLEDs(memMap);
 
         flashing = false;
     }
