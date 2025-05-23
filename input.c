@@ -124,3 +124,63 @@ int waitForAnyButtonPress(unsigned long timeoutMs) {
         usleep(10000); // 10ms
     }
 }
+
+// Set the color of an RGB LED
+void setRGBLed(int ledIndex, uint32_t color) {
+    if (memoryMap.mem_base == NULL) {
+        return;
+    }
+
+    // Select register based on LED index
+    unsigned int offset;
+    switch (ledIndex) {
+        case 0:
+            offset = SPILED_REG_LED_RGB1_o;
+            break;
+        case 1:
+            offset = SPILED_REG_LED_RGB2_o;
+            break;
+        default:
+            return; // Invalid LED index
+    }
+
+    // Write color value to the register
+    *(volatile uint32_t*)(memoryMap.mem_base + offset) = color;
+}
+
+// Flash RGB LEDs red when an enemy is killed
+void flashEnemyKillLED(uint32_t color) {
+    static uint64_t flashStartTime = 0;
+    static bool flashing = false;
+    static uint32_t led1Original = 0;
+    static uint32_t led2Original = 0;
+
+    uint64_t currentTime = getTimeMs();
+
+    // Start flashing
+    if (!flashing) {
+        // Store original LED colors
+        if (memoryMap.mem_base != NULL) {
+            led1Original = *(volatile uint32_t*)(memoryMap.mem_base + SPILED_REG_LED_RGB1_o);
+            led2Original = *(volatile uint32_t*)(memoryMap.mem_base + SPILED_REG_LED_RGB2_o);
+        }
+
+        // Set LEDs to red (0xFF0000)
+        setRGBLed(0, color);
+        setRGBLed(1, color);
+
+        flashing = true;
+        flashStartTime = currentTime;
+    }
+
+    // Check if flash duration has passed
+    if (flashing && (currentTime - flashStartTime >= 1000)) {
+        // Restore original LED colors
+        if (memoryMap.mem_base != NULL) {
+            *(volatile uint32_t*)(memoryMap.mem_base + SPILED_REG_LED_RGB1_o) = led1Original;
+            *(volatile uint32_t*)(memoryMap.mem_base + SPILED_REG_LED_RGB2_o) = led2Original;
+        }
+
+        flashing = false;
+    }
+}

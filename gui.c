@@ -171,6 +171,7 @@ bool displaySettingsMenu(unsigned short *fb, unsigned char *parlcd_mem_base, Mem
 
         if (buttonPressed == BLUE_KNOB) {
             // Exit settings
+            usleep(500000);
             return true;
         } else if (buttonPressed != -1) { // Any button press (except timeout)
             // Toggle game mode
@@ -181,7 +182,7 @@ bool displaySettingsMenu(unsigned short *fb, unsigned char *parlcd_mem_base, Mem
             setGameMode(currentMode);
 
              // Add debounce delay
-             usleep(500000); // 300ms delay
+             usleep(500000); // 500ms delay
         }
     }
 }

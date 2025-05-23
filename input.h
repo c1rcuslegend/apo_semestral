@@ -37,5 +37,9 @@ int getKnobRotation(int knobId);
 bool isButtonPressed(int knobId);
 // Wait for any button press with timeout (in ms), return button pressed or -1 for timeout
 int waitForAnyButtonPress(unsigned long timeoutMs);
+// Flash RGB LEDs red when an enemy is killed
+void flashEnemyKillLED(uint32_t color);
+// Set RGB LED color
+void setRGBLed(int ledIndex, uint32_t color);
 
 #endif // INPUT_H

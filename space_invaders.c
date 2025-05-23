@@ -134,6 +134,7 @@ int main(int argc, char *argv[])
 
                 case MENU_SETTINGS:
                     printf("Opening settings...\n");
+                    usleep(500000);
                     displaySettingsMenu(fb, parlcd_mem_base, &memMap);
                     break;
             }

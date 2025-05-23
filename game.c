@@ -55,7 +55,7 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     if (mode == GAME_MODE_BIZARRE) {
         game->shipSprite = read_ppm("sprites/harley_quinn.ppm");
     } else {
-        game->shipSprite = read_ppm("sprites/player.ppm");
+        game->shipSprite = read_ppm("sprites/player_01.ppm");
     }
     if (!game->shipSprite) {
         printf("Failed to load ship sprite\n");

@@ -44,6 +44,8 @@ void updatePlayerBullets(GameState* game) {
                             }
                             updateScore(game, points);
 
+                            flashEnemyKillLED(0xFF00);
+
                             // Deactivate bullet
                             game->bullets[i].active = false;
                             break;
@@ -66,6 +68,8 @@ void updatePlayerBullets(GameState* game) {
 
                     // Award bonus points
                     updateScore(game, MYSTERY_SHIP_POINTS);
+
+                    flashEnemyKillLED(0xFFE0);
 
                     // Deactivate bullet
                     game->bullets[i].active = false;
