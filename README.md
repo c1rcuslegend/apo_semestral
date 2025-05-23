@@ -11,6 +11,8 @@ cd apo_semestral
 
 make
 
+./space_invaders
+
 ## PROJECT STRUCTRURE
 
 - `space_invaders.c` - Program entry point that initializes hardware, manages game loop, and handles main state transitions
@@ -24,6 +26,6 @@ make
 - `settings.c` - Game settings wrapper for managing the game configuration
 - `texter.c` - Handles text writing to and reading from the text file for saving high scores
 
-These files together create a Space Invaders ([Wiki](https://en.wikipedia.org/wiki/Space_Invaders)) game designed for embedded hardware with physical knob controls, LED indicators, and an LCD display.
+These files together create a Space Invaders ([Wikipedia](https://en.wikipedia.org/wiki/Space_Invaders)) game designed for embedded hardware with physical knob controls, LED indicators, and an LCD display.
 
 ## [WIKI](https://github.com/c1rcuslegend/apo_semestral/wiki/User-Manual) 
