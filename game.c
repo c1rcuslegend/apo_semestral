@@ -9,6 +9,19 @@
 #include "font_types.h"
 #include "game_utils.h"
 
+// Array of background colors - from light blue to dark blue (deeper space)
+#define BACKGROUND_COLORS_COUNT 8
+static const uint16_t backgroundColors[BACKGROUND_COLORS_COUNT] = {
+    0x867F,  // Light blue
+    0x5EBF,  // Medium light blue
+    0x369F,  // Medium blue
+    0x1E5F,  // Medium dark blue
+    0x0E3F,  // Dark blue
+    0x061F,  // Darker blue
+    0x021F,  // Very dark blue
+    0x001F   // Darkest blue
+};
+
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;
 
@@ -141,8 +154,12 @@ void updateGame(GameState* game, MemoryMap* memMap) {
 void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_base) {
     if (!game) return;
 
-    // Clear the screen
-    clearScreen(fb, 0x7010); // Dark purple background
+    // Clear the screen with level-appropriate background color (deeper in space)
+    int colorIndex = game->level - 1;  // Level starts at 1
+    if (colorIndex >= BACKGROUND_COLORS_COUNT) {
+        colorIndex = BACKGROUND_COLORS_COUNT - 1;  // Stop and use darkest blue for high levels
+    }
+    clearScreen(fb, backgroundColors[colorIndex]);
 
     // Draw boundary line
     for (int x = 0; x < LCD_WIDTH; x++) {

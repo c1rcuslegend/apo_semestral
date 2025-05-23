@@ -14,6 +14,7 @@
 
 // External font reference
 extern font_descriptor_t font_winFreeSystem14x16;
+extern font_descriptor_t font_rom8x16;
 
 // Menu item text
 static const char* menuItemLabels[MENU_OPTIONS_COUNT] = {
@@ -50,12 +51,19 @@ bool updateMenuSelection(MenuState *menu, int knobId) {
 
     int rotation = getKnobRotation(knobId);
 
-    if (abs(accumulatedRotation) >= 3) { // THRESHOLD FOR LESS SENSITIVITY
-        // Accumulate rotation
-        accumulatedRotation += rotation;
+    // Accumulate rotation
+    accumulatedRotation += rotation;
 
-        // Update selection based on rotation
-        menu->selection += rotation;
+    if (abs(accumulatedRotation) >= 3) { // THRESHOLD FOR LESS SENSITIVITY
+        // Determine direction of menu movement (normalize to +1 or -1)
+        int direction = (accumulatedRotation > 0) ? 1 : -1;
+
+        // Update selection based on direction
+        menu->selection += direction;
+
+         // Reset accumulated rotation after use
+        accumulatedRotation = 0;
+
         // Wrap around if needed
         while (menu->selection < 0) {
             menu->selection += menu->itemCount;
@@ -158,7 +166,7 @@ int showMainMenu(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *
             }
 
             // Draw title
-            drawCenteredString(fb, 50, "SPACE INVADERS", &font_winFreeSystem14x16, COLOR_SPECIAL_TEXT, 3);
+            drawCenteredString(fb, 50, "SPACE INVADERS", &font_rom8x16, COLOR_SPECIAL_TEXT, 3);
 
             // Draw menu items
             int startY = 120;  // Vertical starting position
@@ -176,7 +184,7 @@ int showMainMenu(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *
             char highScoreLabel[64];
             snprintf(highScoreLabel, sizeof(highScoreLabel), "HIGH SCORE: %d", readHighScore());
             drawCenteredString(fb, startY + MENU_OPTIONS_COUNT * spacing + 20,
-                               highScoreLabel, &font_winFreeSystem14x16, COLOR_TEXT, 2);
+                               highScoreLabel, &font_rom8x16, COLOR_TEXT, 1);
 
             // Update display
             updateDisplay(parlcd_mem_base, fb);
