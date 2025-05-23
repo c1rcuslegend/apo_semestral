@@ -10,6 +10,7 @@
 #include "font_types.h"
 #include "main_menu.h"
 #include "input.h"
+#include "settings.h"
 
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;
@@ -139,4 +140,45 @@ bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base,
     }
 
     return false;
+}
+
+bool displaySettingsMenu(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *memMap) {
+    GameMode currentMode = getGameMode();
+
+    while (1) {
+        // Clear screen with dark blue background
+        clearScreen(fb, 0x7010);
+
+        // Draw title
+        drawCenteredString(fb, 80, "SETTINGS", &font_rom8x16, 0x07E0, 2);
+
+        // Draw game mode option
+        drawCenteredString(fb, 140, "GAME MODE:", &font_winFreeSystem14x16, 0xFFFF, 1);
+
+        // Draw current mode with highlighted color
+        const char* modeText = (currentMode == GAME_MODE_REGULAR) ? "REGULAR" : "BIZARRE";
+        drawCenteredString(fb, 170, modeText, &font_winFreeSystem14x16, 0xF800, 1); // Red color
+
+        // Draw instructions
+        drawCenteredString(fb, 220, "Press ANY BUTTON to toggle mode", &font_winFreeSystem14x16, 0xFFFF, 1);
+        drawCenteredString(fb, 250, "Press BLUE to exit", &font_winFreeSystem14x16, 0xFFFF, 1);
+
+        // Update display
+        updateDisplay(parlcd_mem_base, fb);
+
+        // Wait for button press
+        int buttonPressed = waitForAnyButtonPress(1000); // 1 second timeout
+
+        if (buttonPressed == BLUE_KNOB) {
+            // Exit settings
+            return true;
+        } else if (buttonPressed != -1) { // Any button press (except timeout)
+            // Toggle game mode
+            currentMode = (currentMode == GAME_MODE_REGULAR) ?
+                          GAME_MODE_BIZARRE : GAME_MODE_REGULAR;
+
+            // Save the new game mode
+            setGameMode(currentMode);
+        }
+    }
 }

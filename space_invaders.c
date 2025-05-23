@@ -106,14 +106,6 @@ int main(int argc, char *argv[])
 
                         // Render game
                         renderGame(&gameState, fb, parlcd_mem_base);
-
-                        // Check if GREEN knob is pressed to exit game (temporary)
-                        if (isButtonPressed(GREEN_KNOB)) {
-                            gameState.gameOver = true;
-                        }
-
-                        // Small delay to prevent CPU hogging
-                        // usleep(16667); // ~60 FPS
                     }
 
                     // Display game over screen
@@ -140,11 +132,7 @@ int main(int argc, char *argv[])
 
             case MENU_SETTINGS:
                 printf("Opening settings...\n");
-                // Placeholder for settings
-                clearScreen(fb, 0x7010);
-                drawCenteredString(fb, 160, "SETTINGS", &font_winFreeSystem14x16, 0xFFFF, 2);
-                updateDisplay(parlcd_mem_base, fb);
-                sleep(2);
+                displaySettingsMenu(fb, parlcd_mem_base, &memMap);
                 break;
         }
     }

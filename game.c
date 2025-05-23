@@ -8,6 +8,7 @@
 #include "input.h"
 #include "font_types.h"
 #include "game_utils.h"
+#include "settings.h"
 
 // Array of background colors - from light blue to deep purple (deeper space)
 #define BACKGROUND_COLORS_COUNT 8
@@ -20,6 +21,18 @@ static const uint16_t backgroundColors[BACKGROUND_COLORS_COUNT] = {
     0x88BF,  // Blue-purple
     0xA09F,  // Purple
     0x801F   // Dark purple
+};
+
+#define BIZARRE_SPRITES_COUNT 8;
+static const char* bizarreSprites[BIZARRE_SPRITES_COUNT] = {
+    "sprites/captain_america.ppm",
+    "sprites/flash.ppm",
+    "sprites/hulk.ppm",
+    "sprites/spiderman.ppm",
+    "sprites/superman.ppm",
+    "sprites/thor.ppm",
+    "sprites/wolverine.ppm",
+    "sprites/wonder_woman.ppm"
 };
 
 
@@ -35,15 +48,22 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     // Initialize input system
     inputInit(memMap);
 
+    // Get current game mode
+    GameMode mode = getGameMode();
+
     // Load ship sprite
-    game->shipSprite = read_ppm("sprites/harley_quinn.ppm");
+    if (mode == GAME_MODE_BIZARRE) {
+        game->shipSprite = read_ppm("sprites/harley_quinn.ppm");
+    } else {
+        game->shipSprite = read_ppm("player.png");
+    }
     if (!game->shipSprite) {
         printf("Failed to load ship sprite\n");
         return false;
     }
 
     // Set ship initial position and parameters
-    game->shipScale = 3.0f;
+    game->shipScale = (mode == GAME_MODE_BIZARRE) ? 1.5f : 3.0f ;
     game->shipWidth = game->shipSprite->width * game->shipScale;
     game->shipHeight = game->shipSprite->height * game->shipScale;
 
@@ -58,9 +78,37 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     game->lastShotTime = 0;
 
     // Load enemy sprites
+    int usedIndices[3] = {-1, -1, -1}; // Array to track which bizarre sprites are used
+
     for (int i = 0; i < 3; i++) {
         char filename[32];
-        sprintf(filename, "sprites/spiderman.ppm");
+        if (mode == GAME_MODE_BIZARRE) {
+            // Load bizarre enemy sprites - select a random unused sprite
+            int randomIndex;
+            bool isDuplicate;
+
+            do {
+                isDuplicate = false;
+                randomIndex = rand() % BIZARRE_SPRITES_COUNT;
+
+                // Check if this index was already used
+                for (int j = 0; j < i; j++) {
+                    if (randomIndex == usedIndices[j]) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+            } while (isDuplicate);
+
+            // Store the selected index
+            usedIndices[i] = randomIndex;
+
+            // Get the filename from our array
+            sprintf(filename, "%s", bizarreSprites[randomIndex]);
+        } else {
+            // Load regular enemy sprites
+            sprintf(filename, "sprites/nemesis_0%d.ppm", i+1);
+        }
         game->enemySprites[i] = read_ppm(filename);
         if (!game->enemySprites[i]) {
             printf("Failed to load enemy sprite!\n");
@@ -69,7 +117,11 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     }
 
     // Load mystery ship sprite
-    game->mysteryShipSprite = read_ppm("sprites/poison_ivy.ppm");
+    if (mode == GAME_MODE_BIZARRE) {
+        game->mysteryShipSprite = read_ppm("sprites/batman.ppm");
+    } else {
+        game->mysteryShipSprite = read_ppm("sprites/space_ship.ppm");
+    }
     if (!game->mysteryShipSprite) {
         printf("Failed to load mystery ship sprite!\n");
         return false;

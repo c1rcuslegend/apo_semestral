@@ -29,6 +29,7 @@ static const char* menuItemLabels[MENU_OPTIONS_COUNT] = {
 #define COLOR_SPECIAL_TEXT  0xFFE0 // Yellow
 #define COLOR_SELECTED   0x001F    // Blue background
 #define COLOR_HIGHLIGHT  0xF800    // Red
+#define COLOR_SCORE    0x07E0    // Green
 
 // Initialize menu state
 void initMenuState(MenuState *menu, int itemCount) {
@@ -184,7 +185,7 @@ int showMainMenu(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *
             char highScoreLabel[64];
             snprintf(highScoreLabel, sizeof(highScoreLabel), "HIGH SCORE: %d", readHighScore());
             drawCenteredString(fb, startY + MENU_OPTIONS_COUNT * spacing + 20,
-                               highScoreLabel, &font_rom8x16, COLOR_HIGHLIGHT, 1);
+                               highScoreLabel, &font_rom8x16, COLOR_SCORE, 1);
 
             // Update display
             updateDisplay(parlcd_mem_base, fb);

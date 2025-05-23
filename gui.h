@@ -5,25 +5,13 @@
 #include "main_menu.h"
 #include "input.h"
 
-/**
- * Displays the start menu and waits for user input
- *
- * @param fb Pointer to the framebuffer
- * @param parlcd_mem_base Pointer to the LCD memory base
- * @param mem_base Pointer to the LED/button memory base
- * @return true when user presses a button
- */
+// Displays the start menu and waits for user input
 bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsigned char *mem_base,  MemoryMap *memMap);
 
-/**
- * Displays the game over screen
- *
- * @param fb Pointer to the framebuffer
- * @param parlcd_mem_base Pointer to the LCD memory base
- * @param memMap Memory map for input
- * @param score Final score of the player
- * @return true when user presses a button to continue
- */
+// Displays the game over screen
 bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *memMap, int score);
+
+// Displays the settings menu and handles user input
+bool displaySettingsMenu(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *memMap);
 
 #endif /* GUI_H */
