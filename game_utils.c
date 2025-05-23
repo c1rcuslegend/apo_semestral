@@ -159,7 +159,7 @@ void updateEnemyBullets(GameState* game) {
                     game->lives[player]--;
 
                     // Check game over
-                    if (game->lives[player] <= 0 || (!game->isMultiplayer && ame->lives[player] <= 0 && ame->lives[ (player == 1) ? 0 : 1] <= 0)) {
+                    if (game->lives[player] <= 0 || (!game->isMultiplayer && game->lives[player] <= 0 && game->lives[ (player == 1) ? 0 : 1] <= 0)) {
                         game->gameOver = true;
                     }
 

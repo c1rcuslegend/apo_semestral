@@ -11,6 +11,7 @@
 #include "main_menu.h"
 #include "input.h"
 #include "settings.h"
+#include "texter.h"
 
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;
@@ -86,7 +87,7 @@ bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsign
 }
 
 bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base,
-                         MemoryMap *memMap, int[2] score, bool isMultiplayer) {
+                         MemoryMap *memMap, int score[2], bool isMultiplayer) {
     // Clear screen with dark background
     clearScreen(fb, 0x0000);
 
@@ -94,11 +95,20 @@ bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base,
     int highScore = readHighScore();
     bool isNewHighScore = false;
 
+    int playerScore = 0;
+
+    // Check if multiplayer mode
+    if (isMultiplayer) {
+        playerScore = (score[0] > score[1]) ? score[0] : score[1];
+    } else {
+        playerScore = score[0];
+    }
+
     // Check if new high score achieved
-    if (score > highScore) {
-        writeHighScore(score);
+    if (playerScore > highScore) {
+        writeHighScore(playerScore);
         isNewHighScore = true;
-        highScore = score;
+        highScore = playerScore;
     }
 
     // Game Over text
@@ -115,7 +125,7 @@ bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base,
     }
     // Score display
     char scoreText[32];
-    sprintf(scoreText, "Score: %d", (score[0] > score[1]) ? score[0] : score[1]);
+    sprintf(scoreText, "Score: %d", playerScore;
     drawCenteredString(fb, 160, scoreText, &font_winFreeSystem14x16, 0xFFFF, 1);
 
     // High score display
