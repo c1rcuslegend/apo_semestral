@@ -112,6 +112,6 @@ bool shouldChangeDirection(GameState* game);
 // Move all enemies down one row
 void moveEnemiesDown(GameState* game);
 // Fire player bullet
-void fireBullet(GameState* game);
+void fireBullet(GameState* game, int playerIndex);
 
 #endif // GAME_H

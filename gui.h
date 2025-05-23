@@ -9,7 +9,7 @@
 bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsigned char *mem_base,  MemoryMap *memMap);
 
 // Displays the game over screen
-bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *memMap, int score);
+bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *memMap, int[2] score, bool isMultiplayer);
 
 // Displays the settings menu and handles user input
 bool displaySettingsMenu(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *memMap);

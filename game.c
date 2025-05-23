@@ -63,9 +63,9 @@ bool initGame(GameState* game, MemoryMap* memMap, bool multiplayer) {
     }
 
     // Set ship initial position and parameters
-    game->shipScale[0] = (mode == GAME_MODE_BIZARRE) ? 3.0f : 1.5f ;
-    game->shipWidth[0] = game->shipSprite->width * game->shipScale;
-    game->shipHeight[0] = game->shipSprite->height * game->shipScale;
+    game->shipScale = (mode == GAME_MODE_BIZARRE) ? 3.0f : 1.5f ;
+    game->shipWidth = game->shipSprite[0]->width * game->shipScale;
+    game->shipHeight = game->shipSprite[0]->height * game->shipScale;
 
     // Position ship at bottom center of screen
     game->shipX[0] = (LCD_WIDTH - game->shipWidth) / 2;
@@ -290,7 +290,7 @@ void renderGame(GameState* game, unsigned short* fb, unsigned char* parlcd_mem_b
                 unsigned short bulletColor = (player == 0) ? BULLET_COLOR : 0x07FF; // Cyan for P2
                 for (int y = 0; y < BULLET_HEIGHT; y++) {
                     for (int x = 0; x < BULLET_WIDTH; x++) {
-                        drawPixel(fb, game->bullets[player][i].x + x, game->bullets[player][i].y + y, BULLET_COLOR);
+                        drawPixel(fb, game->bullets[player][i].x + x, game->bullets[player][i].y + y, bulletColor);
                     }
                 }
             }

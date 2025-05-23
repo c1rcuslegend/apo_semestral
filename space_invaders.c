@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 
                     // Initialize game state
                     GameState gameState;
-                    if (initGame(&gameState, &memMap)) {
+                    if (initGame(&gameState, &memMap, false)) {
                         // Game loop
                         while (!gameState.gameOver) {
                             // Update game state based on input
@@ -111,7 +111,7 @@ int main(int argc, char *argv[])
 
                         // Display game over screen
                         while (!displayGameOverScreen(fb, parlcd_mem_base,
-                                                 &memMap, gameState.score)) {
+                                                 &memMap, gameState.score, false)) {
                         // Wait for button press
                         }
 
@@ -123,14 +123,34 @@ int main(int argc, char *argv[])
                     break;
                 }
 
-                case MENU_MULTIPLAYER:
-                    printf("Starting multiplayer game...\n");
-                    // Placeholder for multiplayer game
-                    clearScreen(fb, 0x7010);
-                    drawCenteredString(fb, 160, "MULTIPLAYER GAME", &font_winFreeSystem14x16, 0xFFFF, 2);
-                    updateDisplay(parlcd_mem_base, fb);
-                    sleep(2);
+                case MENU_MULTIPLAYER: {
+                    printf("Starting multi player game...\n");
+
+                    // Initialize game state
+                    GameState gameState;
+                    if (initGame(&gameState, &memMap, true)) {
+                        // Game loop
+                        while (!gameState.gameOver) {
+                            // Update game state based on input
+                            updateGame(&gameState, &memMap);
+
+                            // Render game
+                            renderGame(&gameState, fb, parlcd_mem_base);
+                        }
+
+                        // Display game over screen
+                        while (!displayGameOverScreen(fb, parlcd_mem_base,
+                                                 &memMap, gameState.score, true)) {
+                        // Wait for button press
+                        }
+
+                        // Clean up game resources
+                        quit = true;
+                        clearScreen(fb, 0x0000);
+                        cleanupGame(&gameState);
+                    }
                     break;
+                }
 
                 case MENU_SETTINGS:
                     printf("Opening settings...\n");

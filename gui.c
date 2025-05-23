@@ -86,7 +86,7 @@ bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsign
 }
 
 bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base,
-                         MemoryMap *memMap, int score) {
+                         MemoryMap *memMap, int[2] score, bool isMultiplayer) {
     // Clear screen with dark background
     clearScreen(fb, 0x0000);
 
@@ -105,9 +105,17 @@ bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base,
     char gameOver[] = "GAME OVER";
     drawCenteredString(fb, 100, gameOver, &font_rom8x16, 0xFF00, 2);
 
+    if (isMultiplayer) {
+        char winnerText[32];
+        sprintf(winnerText, "Player %d WINS!", (score[0] > score[1]) ? 1 : 2);
+        drawCenteredString(fb, 130, winnerText, &font_winFreeSystem14x16, 0xFFFF, 1);
+    } else {
+        char singlePlayerText[] = "Well done!";
+        drawCenteredString(fb, 130, singlePlayerText, &font_winFreeSystem14x16, 0xFFFF, 1);
+    }
     // Score display
     char scoreText[32];
-    sprintf(scoreText, "Your Score: %d", score);
+    sprintf(scoreText, "Score: %d", (score[0] > score[1]) ? score[0] : score[1]);
     drawCenteredString(fb, 160, scoreText, &font_winFreeSystem14x16, 0xFFFF, 1);
 
     // High score display
