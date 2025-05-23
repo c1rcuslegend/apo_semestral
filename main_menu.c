@@ -10,9 +10,11 @@
 #include "mzapo_parlcd.h"
 #include "mzapo_regs.h"
 #include "font_types.h"
+#include "texter.h"
 
 // External font reference
 extern font_descriptor_t font_winFreeSystem14x16;
+extern font_descriptor_t font_rom8x16;
 
 // Menu item text
 static const char* menuItemLabels[MENU_OPTIONS_COUNT] = {
@@ -22,8 +24,9 @@ static const char* menuItemLabels[MENU_OPTIONS_COUNT] = {
 };
 
 // Colors
-#define COLOR_BACKGROUND 0x0000    // Black
+#define COLOR_BACKGROUND 0x7010    // Dark Purple
 #define COLOR_TEXT       0xFFFF    // White
+#define COLOR_SPECIAL_TEXT  0xFFE0 // Yellow
 #define COLOR_SELECTED   0x001F    // Blue background
 #define COLOR_HIGHLIGHT  0xF800    // Red
 
@@ -40,15 +43,27 @@ void initMenuState(MenuState *menu, int itemCount) {
 
 // Update menu selection based on knob rotation
 bool updateMenuSelection(MenuState *menu, int knobId) {
+    static int accumulatedRotation = 0;
+
     if (menu == NULL) {
         return false;
     }
 
     int rotation = getKnobRotation(knobId);
 
-    if (rotation != 0) {
-        // Update selection based on rotation
-        menu->selection += rotation;
+    // Accumulate rotation
+    accumulatedRotation += rotation;
+
+    if (abs(accumulatedRotation) >= 3) { // THRESHOLD FOR LESS SENSITIVITY
+        // Determine direction of menu movement (normalize to +1 or -1)
+        int direction = (accumulatedRotation > 0) ? 1 : -1;
+
+        // Update selection based on direction
+        menu->selection += direction;
+
+         // Reset accumulated rotation after use
+        accumulatedRotation = 0;
+
         // Wrap around if needed
         while (menu->selection < 0) {
             menu->selection += menu->itemCount;
@@ -151,7 +166,7 @@ int showMainMenu(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *
             }
 
             // Draw title
-            drawCenteredString(fb, 50, "SPACE INVADERS", &font_winFreeSystem14x16, COLOR_TEXT, 3);
+            drawCenteredString(fb, 50, "SPACE INVADERS", &font_rom8x16, COLOR_SPECIAL_TEXT, 3);
 
             // Draw menu items
             int startY = 120;  // Vertical starting position
@@ -164,6 +179,12 @@ int showMainMenu(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *
                 drawMenuItem(fb, x, startY + i * spacing,
                              menuItemLabels[i], (i == menu.selection));
             }
+
+            // Draw HIGH SCORE as centered text (not a menu option)
+            char highScoreLabel[64];
+            snprintf(highScoreLabel, sizeof(highScoreLabel), "HIGH SCORE: %d", readHighScore());
+            drawCenteredString(fb, startY + MENU_OPTIONS_COUNT * spacing + 20,
+                               highScoreLabel, &font_rom8x16, COLOR_HIGHLIGHT, 1);
 
             // Update display
             updateDisplay(parlcd_mem_base, fb);

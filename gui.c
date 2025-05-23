@@ -13,6 +13,7 @@
 
 // GLOBAL FONT VALUE
 extern font_descriptor_t font_winFreeSystem14x16;
+extern font_descriptor_t font_rom8x16;
 
 // get time in milliseconds
 static uint64_t get_time_ms() {
@@ -24,10 +25,10 @@ static uint64_t get_time_ms() {
 bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsigned char *mem_base, MemoryMap *memMap) {
     inputInit(memMap);
     // Clear screen with black background
-    clearScreen(fb, 0x0000);
+    clearScreen(fb, 0x7010);
 
     // Draw starting text
-    drawCenteredString(fb, 120, "SPACE INVADERS", &font_winFreeSystem14x16, 0xFFFF, 3);
+    drawCenteredString(fb, 120, "SPACE INVADERS", &font_rom8x16, 0xFFE0, 3);
     drawCenteredString(fb, 180, "Micro Edition", &font_winFreeSystem14x16, 0x07E0, 2);
 
     // Blinking text implementation
@@ -55,7 +56,7 @@ bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsign
             // clear text area
             for (int y = text_y; y < text_y + text_height; y++) {
                 for (int x = 0; x < LCD_WIDTH; x++) {
-                    drawPixel(fb, x, y, 0x0000);
+                    drawPixel(fb, x, y, 0x7010);
                 }
             }
 
@@ -71,13 +72,70 @@ bool displayStartMenu(unsigned short *fb, unsigned char *parlcd_mem_base, unsign
         // Check for any button press
         for (int i = 0; i < 3; i++) {
             if (isButtonPressed(i)) {
-                usleep(100000); // Debounce delay
+                usleep(300000); // Debounce delay
                 return true;  // Button was pressed
             }
         }
 
         // Small delay to prevent CPU hogging
         usleep(10000); // 10ms
+    }
+
+    return false;
+}
+
+bool displayGameOverScreen(unsigned short *fb, unsigned char *parlcd_mem_base,
+                         MemoryMap *memMap, int score) {
+    // Clear screen with dark background
+    clearScreen(fb, 0x0000);
+
+    // Read high score
+    int highScore = readHighScore();
+    bool isNewHighScore = false;
+
+    // Check if new high score achieved
+    if (score > highScore) {
+        writeHighScore(score);
+        isNewHighScore = true;
+        highScore = score;
+    }
+
+    // Game Over text
+    char gameOver[] = "GAME OVER";
+    drawCenteredString(fb, 100, gameOver, &font_rom8x16, 0xFF00, 2);
+
+    // Score display
+    char scoreText[32];
+    sprintf(scoreText, "Your Score: %d", score);
+    drawCenteredString(fb, 160, scoreText, &font_winFreeSystem14x16, 0xFFFF, 1);
+
+    // High score display
+    char highScoreText[32];
+    sprintf(highScoreText, "High Score: %d", highScore);
+    drawCenteredString(fb, 190, highScoreText, &font_winFreeSystem14x16, 0xFFFF, 1);
+
+    // New high score message if applicable
+    if (isNewHighScore) {
+        char newHighScoreText[] = "NEW HIGH SCORE!";
+        drawCenteredString(fb, 220, newHighScoreText, &font_winFreeSystem14x16, 0xFFE0, 1); // Yellow color
+    }
+
+    // Press any button to continue
+    char continueText[] = "Press any button to continue";
+    drawCenteredString(fb, 270, continueText, &font_winFreeSystem14x16, 0xFFFF, 1);
+
+    // Update display
+    updateDisplay(parlcd_mem_base, fb);
+
+    // Check for any button press
+    while (1) {
+        for (int i = 0; i < 3; i++) {
+            if (isButtonPressed(i)) {
+                clearScreen(fb, 0x0000);
+                updateDisplay(parlcd_mem_base, fb);
+                return true;  // Button was pressed
+            }
+        }
     }
 
     return false;
