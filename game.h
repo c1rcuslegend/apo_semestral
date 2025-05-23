@@ -27,10 +27,10 @@
 
 // Enemy
 #define MAX_ENEMY_ROWS 5
-#define MAX_ENEMY_COLS 8
-#define ENEMY_WIDTH 50
-#define ENEMY_HEIGHT 30
-#define ENEMY_SPACING_X 4
+#define MAX_ENEMY_COLS 10
+#define ENEMY_WIDTH 32
+#define ENEMY_HEIGHT 32
+#define ENEMY_SPACING_X 10
 #define ENEMY_SPACING_Y 0
 #define ENEMY_MOVE_SPEED 1
 #define ENEMY_MOVE_INTERVAL 500 // ms between movements

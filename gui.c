@@ -179,6 +179,9 @@ bool displaySettingsMenu(unsigned short *fb, unsigned char *parlcd_mem_base, Mem
 
             // Save the new game mode
             setGameMode(currentMode);
+
+             // Add debounce delay
+             usleep(500000); // 300ms delay
         }
     }
 }

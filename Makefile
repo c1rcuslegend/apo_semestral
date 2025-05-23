@@ -9,7 +9,7 @@ LDFLAGS += -static
 LDLIBS += -lrt -lpthread
 #LDLIBS += -lm
 
-SOURCES = space_invaders.c mzapo_phys.c mzapo_parlcd.c serialize_lock.c graphics.c gui.c input.c main_menu.c ppm_image.c game.c game_utils.c texter.c
+SOURCES = space_invaders.c mzapo_phys.c mzapo_parlcd.c serialize_lock.c graphics.c gui.c input.c main_menu.c ppm_image.c game.c game_utils.c texter.c settings.c
 SOURCES += font_prop14x16.c font_rom8x16.c
 TARGET_EXE = space_invaders
 #TARGET_IP ?= 192.168.202.127

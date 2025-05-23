@@ -23,7 +23,7 @@ static const uint16_t backgroundColors[BACKGROUND_COLORS_COUNT] = {
     0x801F   // Dark purple
 };
 
-#define BIZARRE_SPRITES_COUNT 8;
+#define BIZARRE_SPRITES_COUNT 8
 static const char* bizarreSprites[BIZARRE_SPRITES_COUNT] = {
     "sprites/captain_america.ppm",
     "sprites/flash.ppm",
@@ -55,7 +55,7 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     if (mode == GAME_MODE_BIZARRE) {
         game->shipSprite = read_ppm("sprites/harley_quinn.ppm");
     } else {
-        game->shipSprite = read_ppm("player.png");
+        game->shipSprite = read_ppm("sprites/player.ppm");
     }
     if (!game->shipSprite) {
         printf("Failed to load ship sprite\n");
@@ -63,7 +63,7 @@ bool initGame(GameState* game, MemoryMap* memMap) {
     }
 
     // Set ship initial position and parameters
-    game->shipScale = (mode == GAME_MODE_BIZARRE) ? 1.5f : 3.0f ;
+    game->shipScale = (mode == GAME_MODE_BIZARRE) ? 3.0f : 1.5f ;
     game->shipWidth = game->shipSprite->width * game->shipScale;
     game->shipHeight = game->shipSprite->height * game->shipScale;
 
