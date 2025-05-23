@@ -140,6 +140,8 @@ int main(int argc, char *argv[])
             }
         }
     }
+    // Turn off all LEDs
+    turnOffAllLEDs(&memMap);
 
     printf("Game ended!\n");
 

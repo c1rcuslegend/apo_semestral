@@ -7,7 +7,7 @@
 bool checkCollision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2);
 
 // Bullet management
-void updatePlayerBullets(GameState* game);
+void updatePlayerBullets(GameState* game, MemoryMap* memMap);
 void fireBullet(GameState* game);
 void fireEnemyBullet(GameState* game, int enemyX, int enemyY);
 void updateEnemyBullets(GameState* game);

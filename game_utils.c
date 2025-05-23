@@ -13,7 +13,7 @@ bool checkCollision(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int 
 }
 
 // Update player bullets (movement and collision)
-void updatePlayerBullets(GameState* game) {
+void updatePlayerBullets(GameState* game, MemoryMap* memMap) {
     for (int i = 0; i < MAX_BULLETS; i++) {
         if (game->bullets[i].active) {
             // Move bullet upward
@@ -44,7 +44,7 @@ void updatePlayerBullets(GameState* game) {
                             }
                             updateScore(game, points);
 
-                            flashEnemyKillLED(0xFF00);
+                            flashEnemyKillLED(&memMap, 0xFF00);
 
                             // Deactivate bullet
                             game->bullets[i].active = false;
@@ -69,7 +69,7 @@ void updatePlayerBullets(GameState* game) {
                     // Award bonus points
                     updateScore(game, MYSTERY_SHIP_POINTS);
 
-                    flashEnemyKillLED(0xFFE0);
+                    flashEnemyKillLED(&memMap, 0xFFE0);
 
                     // Deactivate bullet
                     game->bullets[i].active = false;

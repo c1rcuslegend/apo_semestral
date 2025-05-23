@@ -149,7 +149,7 @@ void setRGBLed(int ledIndex, uint32_t color) {
 }
 
 // Flash RGB LEDs red when an enemy is killed
-void flashEnemyKillLED(uint32_t color) {
+void flashEnemyKillLED(MemoryMap *memMap, uint32_t color) {
     static uint64_t flashStartTime = 0;
     static bool flashing = false;
     static uint32_t led1Original = 0;
@@ -165,7 +165,7 @@ void flashEnemyKillLED(uint32_t color) {
             led2Original = *(volatile uint32_t*)(memoryMap.mem_base + SPILED_REG_LED_RGB2_o);
         }
 
-        // Set LEDs to red (0xFF0000)
+        // Set LEDs to color
         setRGBLed(0, color);
         setRGBLed(1, color);
 
@@ -176,11 +176,24 @@ void flashEnemyKillLED(uint32_t color) {
     // Check if flash duration has passed
     if (flashing && (currentTime - flashStartTime >= 1000)) {
         // Restore original LED colors
-        if (memoryMap.mem_base != NULL) {
-            *(volatile uint32_t*)(memoryMap.mem_base + SPILED_REG_LED_RGB1_o) = led1Original;
-            *(volatile uint32_t*)(memoryMap.mem_base + SPILED_REG_LED_RGB2_o) = led2Original;
-        }
+        turnOffAllLEDs(&memMap);
 
         flashing = false;
     }
+}
+
+// Turn off all LEDs
+void turnOffAllLEDs(MemoryMap *memMap) {
+    if (memMap->mem_base == NULL) {
+        return;
+    }
+
+    // Turn off RGB LED 1
+    *(volatile uint32_t*)(memMap->mem_base + SPILED_REG_LED_RGB1_o) = 0x0;
+
+    // Turn off RGB LED 2
+    *(volatile uint32_t*)(memMap->mem_base + SPILED_REG_LED_RGB2_o) = 0x0;
+
+    // Turn off LED line
+    *(volatile uint32_t*)(memMap->mem_base + SPILED_REG_LED_LINE_o) = 0x0;
 }

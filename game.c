@@ -186,7 +186,7 @@ void updateGame(GameState* game, MemoryMap* memMap) {
     }
 
     // Update player bullets and bullet collisions
-    updatePlayerBullets(game);
+    updatePlayerBullets(game, &memMap);
 
     // Update enemy bullets
     updateEnemyBullets(game);
