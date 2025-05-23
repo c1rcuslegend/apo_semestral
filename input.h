@@ -17,8 +17,7 @@
 #define MENU_START_GAME   0
 #define MENU_MULTIPLAYER  1
 #define MENU_SETTINGS     2
-#define MENU_HIGH_SCORE   3
-#define MENU_OPTIONS_COUNT 4
+#define MENU_OPTIONS_COUNT 3
 
 // stores base addresses
 typedef struct {

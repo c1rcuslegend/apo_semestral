@@ -19,13 +19,13 @@ extern font_descriptor_t font_winFreeSystem14x16;
 static const char* menuItemLabels[MENU_OPTIONS_COUNT] = {
     "Start Game",
     "Multiplayer",
-    "Settings",
-    "HIGH SCORE"
+    "Settings"
 };
 
 // Colors
-#define COLOR_BACKGROUND 0x7010   // Dark Purple
+#define COLOR_BACKGROUND 0x7010    // Dark Purple
 #define COLOR_TEXT       0xFFFF    // White
+#define COLOR_SPECIAL_TEXT  0xFFE0 // Yellow
 #define COLOR_SELECTED   0x001F    // Blue background
 #define COLOR_HIGHLIGHT  0xF800    // Red
 
@@ -42,13 +42,18 @@ void initMenuState(MenuState *menu, int itemCount) {
 
 // Update menu selection based on knob rotation
 bool updateMenuSelection(MenuState *menu, int knobId) {
+    static int accumulatedRotation = 0;
+
     if (menu == NULL) {
         return false;
     }
 
     int rotation = getKnobRotation(knobId);
 
-    if (rotation != 0) {
+    if (abs(accumulatedRotation) >= 3) { // THRESHOLD FOR LESS SENSITIVITY
+        // Accumulate rotation
+        accumulatedRotation += rotation;
+
         // Update selection based on rotation
         menu->selection += rotation;
         // Wrap around if needed
@@ -153,26 +158,25 @@ int showMainMenu(unsigned short *fb, unsigned char *parlcd_mem_base, MemoryMap *
             }
 
             // Draw title
-            drawCenteredString(fb, 50, "SPACE INVADERS", &font_winFreeSystem14x16, COLOR_TEXT, 3);
+            drawCenteredString(fb, 50, "SPACE INVADERS", &font_winFreeSystem14x16, COLOR_SPECIAL_TEXT, 3);
 
             // Draw menu items
             int startY = 120;  // Vertical starting position
             int spacing = 40;  // Spacing between menu items
             int centerX = LCD_WIDTH / 2;
 
-            for (int i = 0; i < MENU_OPTIONS_COUNT; i++) { // TODO: REMAKE THE HIGH SCORE TO NOT BE THE LAST ITEM AND MAKE THE KNOBS LESS SESNSITIVE
+            for (int i = 0; i < MENU_OPTIONS_COUNT; i++) {
                 int itemWidth = stringWidth(menuItemLabels[i], &font_winFreeSystem14x16, 2);
                 int x = centerX - itemWidth/2;
-                if (i == MENU_OPTIONS_COUNT - 1) { // HIGH SCORE
-                    char highScoreLabel[64];
-                    snprintf(highScoreLabel, sizeof(highScoreLabel), "%s: %d", menuItemLabels[i], readHighScore());
-                    drawMenuItem(fb, x, startY + i * spacing,
-                                                     highScoreLabel, (i == menu.selection));
-                } else {
-                    drawMenuItem(fb, x, startY + i * spacing,
-                                 menuItemLabels[i], (i == menu.selection));
-                }
+                drawMenuItem(fb, x, startY + i * spacing,
+                             menuItemLabels[i], (i == menu.selection));
             }
+
+            // Draw HIGH SCORE as centered text (not a menu option)
+            char highScoreLabel[64];
+            snprintf(highScoreLabel, sizeof(highScoreLabel), "HIGH SCORE: %d", readHighScore());
+            drawCenteredString(fb, startY + MENU_OPTIONS_COUNT * spacing + 20,
+                               highScoreLabel, &font_winFreeSystem14x16, COLOR_TEXT, 2);
 
             // Update display
             updateDisplay(parlcd_mem_base, fb);
