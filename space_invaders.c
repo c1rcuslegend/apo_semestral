@@ -34,6 +34,8 @@ uint64_t get_time_ms() {
     return (tv.tv_sec * 1000LL) + (tv.tv_usec / 1000LL);
 }
 
+void startGame(MemoryMap memMap, unsigned short *fb, unsigned char *parlcd_mem_base, bool multiplayer, bool *quit);
+
 int main(int argc, char *argv[])
 {
     /* Serialize execution of applications */
@@ -96,15 +98,13 @@ int main(int argc, char *argv[])
             switch (menuSelection) {
                 case MENU_START_GAME: {
                     printf("Starting single player game...\n");
-                    startGame(&memMap, fb, parlcd_mem_base, false, &quit);
-                    }
+                    startGame(memMap, fb, parlcd_mem_base, false, &quit);
                     break;
                 }
 
                 case MENU_MULTIPLAYER: {
                     printf("Starting multi player game...\n");
-                    startGame(&memMap, fb, parlcd_mem_base, true, &quit);
-                    }
+                    startGame(memMap, fb, parlcd_mem_base, true, &quit);
                     break;
                 }
 
@@ -130,10 +130,10 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void startGame(MemoryMap *memMap, unsigned short *fb, unsigned char *parlcd_mem_base, bool multiplayer, bool *quit) {
+void startGame(MemoryMap memMap, unsigned short *fb, unsigned char *parlcd_mem_base, bool multiplayer, bool *quit) {
     // Initialize game state
     GameState gameState;
-    if (initGame(&gameState, &memMap, false)) {
+    if (initGame(&gameState, &memMap, multiplayer)) {
         // Game loop
         while (!gameState.gameOver) {
             // Update game state based on input
@@ -153,4 +153,6 @@ void startGame(MemoryMap *memMap, unsigned short *fb, unsigned char *parlcd_mem_
         quit = true;
         clearScreen(fb, 0x0000);
         cleanupGame(&gameState);
+        usleep(500000); // Wait for 0.5 seconds before returning to menu
+    }
 }
