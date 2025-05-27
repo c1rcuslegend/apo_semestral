@@ -96,58 +96,14 @@ int main(int argc, char *argv[])
             switch (menuSelection) {
                 case MENU_START_GAME: {
                     printf("Starting single player game...\n");
-
-                    // Initialize game state
-                    GameState gameState;
-                    if (initGame(&gameState, &memMap, false)) {
-                        // Game loop
-                        while (!gameState.gameOver) {
-                            // Update game state based on input
-                            updateGame(&gameState, &memMap);
-
-                            // Render game
-                            renderGame(&gameState, fb, parlcd_mem_base);
-                        }
-
-                        // Display game over screen
-                        while (!displayGameOverScreen(fb, parlcd_mem_base,
-                                                 &memMap, gameState.score, false)) {
-                        // Wait for button press
-                        }
-
-                        // Clean up game resources
-                        quit = true;
-                        clearScreen(fb, 0x0000);
-                        cleanupGame(&gameState);
+                    startGame(&memMap, fb, parlcd_mem_base, false, &quit);
                     }
                     break;
                 }
 
                 case MENU_MULTIPLAYER: {
                     printf("Starting multi player game...\n");
-
-                    // Initialize game state
-                    GameState gameState;
-                    if (initGame(&gameState, &memMap, true)) {
-                        // Game loop
-                        while (!gameState.gameOver) {
-                            // Update game state based on input
-                            updateGame(&gameState, &memMap);
-
-                            // Render game
-                            renderGame(&gameState, fb, parlcd_mem_base);
-                        }
-
-                        // Display game over screen
-                        while (!displayGameOverScreen(fb, parlcd_mem_base,
-                                                 &memMap, gameState.score, true)) {
-                        // Wait for button press
-                        }
-
-                        // Clean up game resources
-                        quit = true;
-                        clearScreen(fb, 0x0000);
-                        cleanupGame(&gameState);
+                    startGame(&memMap, fb, parlcd_mem_base, true, &quit);
                     }
                     break;
                 }
@@ -172,4 +128,29 @@ int main(int argc, char *argv[])
     serialize_unlock();
 
     return 0;
+}
+
+void startGame(MemoryMap *memMap, unsigned short *fb, unsigned char *parlcd_mem_base, bool multiplayer, bool *quit) {
+    // Initialize game state
+    GameState gameState;
+    if (initGame(&gameState, &memMap, false)) {
+        // Game loop
+        while (!gameState.gameOver) {
+            // Update game state based on input
+            updateGame(&gameState, &memMap);
+
+            // Render game
+            renderGame(&gameState, fb, parlcd_mem_base);
+        }
+
+        // Display game over screen
+        while (!displayGameOverScreen(fb, parlcd_mem_base,
+                                 &memMap, gameState.score, multiplayer)) {
+        // Wait for button press
+        }
+
+        // Clean up game resources
+        quit = true;
+        clearScreen(fb, 0x0000);
+        cleanupGame(&gameState);
 }
